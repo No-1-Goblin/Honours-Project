@@ -77,6 +77,7 @@ public class LevelGenerator : MonoBehaviour
                 // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
                 newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
                 List<Connector> newPieceConnectors = newPiece.getConnectors();
+                // I should also randomise this tbh
                 foreach (Connector newConnector in newPieceConnectors)
                 {
                     for (int i = 0; i < 4; i++)

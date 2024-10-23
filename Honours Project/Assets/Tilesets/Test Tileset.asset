@@ -19,3 +19,4 @@ MonoBehaviour:
   standardPieces:
   - {fileID: 5997292806178487266, guid: b0da2dabd5ee94a43988b38f91637c89, type: 3}
   - {fileID: 6215125889335771850, guid: 507a2c3b0a7685e4ea41e612349a8123, type: 3}
+  - {fileID: 7276431228720619505, guid: 0f3ff68de60c6904d85add9e36fa70de, type: 3}
