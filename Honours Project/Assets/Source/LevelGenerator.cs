@@ -22,7 +22,64 @@ public class LevelGenerator : MonoBehaviour
     {
         // Clean up old level first
         deleteLevel();
-        generatedObjects.Add(Instantiate(settings.tileset.startPieces[0]).gameObject);
+        if (!validateGeneratorSettings())
+        {
+            Debug.Log("Invalid Generator Settings");
+            return;
+        }
+        generateStartPoint();
+    }
+
+    private bool validateGeneratorSettings()
+    {
+        if (settings == null)
+            return false;
+        if (settings.tileset == null)
+            return false;
+        if (settings.minParts < 1) 
+            return false;
+        if (settings.maxParts < 1)
+            return false;
+        if (settings.tileset.startPieces.Count < 1)
+            return false;
+        if (settings.tileset.endPieces.Count < 1)
+            return false;
+        if (settings.tileset.standardPieces.Count < 1)
+            return false;
+        return true;
+    }
+
+    private void generateStartPoint()
+    {
+        GameObject startPiece = Instantiate(getRandomPiece(settings.tileset.startPieces)).gameObject;
+        float rotation = getRandomRotation();
+        startPiece.transform.Rotate(new Vector3(0, rotation, 0));
+        generatedObjects.Add(startPiece);
+    }
+
+    private SnappablePiece getRandomPiece(List<SnappablePiece> list)
+    {
+        SnappablePiece piece = null;
+        int index = Random.Range(0, list.Count);
+        piece = list[index];
+        return piece;
+    }
+
+    private float getRandomRotation()
+    {
+        int rotID = Random.Range(0, 4);
+        switch (rotID)
+        {
+            case 0:
+                return 0;
+            case 1:
+                return 90;
+            case 2:
+                return 180;
+            case 3:
+                return 270;
+        }
+        return 0;
     }
 
     public void deleteLevel()
@@ -30,8 +87,11 @@ public class LevelGenerator : MonoBehaviour
         // Destroy all generated level elements
         while (generatedObjects.Count > 0)
         {
-            // Destroy immediate so it works in editor
-            DestroyImmediate(generatedObjects[0]);
+            if (generatedObjects[0])
+            {
+                // Destroy immediate so it works in editor
+                DestroyImmediate(generatedObjects[0]);
+            }
             generatedObjects.RemoveAt(0);
         }
     }
