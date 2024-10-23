@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -27,7 +28,8 @@ public class LevelGenerator : MonoBehaviour
             Debug.Log("Invalid Generator Settings");
             return;
         }
-        generateStartPoint();
+        SnappablePiece startPiece = generateStartPoint();
+        populateConnections(startPiece, settings.maxParts);
     }
 
     private bool validateGeneratorSettings()
@@ -49,14 +51,87 @@ public class LevelGenerator : MonoBehaviour
         return true;
     }
 
-    private void generateStartPoint()
+    private SnappablePiece generateStartPoint()
     {
         GameObject startPiece = Instantiate(getRandomPiece(settings.tileset.startPieces)).gameObject;
         float rotation = getRandomRotation();
         startPiece.transform.Rotate(new Vector3(0, rotation, 0));
         generatedObjects.Add(startPiece);
+        return startPiece.GetComponent<SnappablePiece>();
     }
 
+    private void populateConnections(SnappablePiece startPiece, int piecesLeft)
+    {
+        if (piecesLeft <= 0)
+            return;
+        List<Connector> connectors = startPiece.getConnectors();
+        foreach (Connector connector in connectors)
+        {
+            if (connector.isConnected())
+                continue;
+            bool success = false;
+            SnappablePiece newPiece;
+            int loops = 0;
+            do
+            {
+                // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
+                newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
+                List<Connector> newPieceConnectors = newPiece.getConnectors();
+                foreach (Connector newConnector in newPieceConnectors)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        // Find amount to move by to make connectors touch
+                        Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
+                        newPiece.gameObject.transform.position += moveAmount;
+                        Debug.Log(newPiece.boxCollider.bounds);
+                        Debug.Log(startPiece.boxCollider.bounds);
+                        if (!intersects(newPiece.gameObject.transform.position, newPiece.boxCollider.size * 0.49f, startPiece.gameObject.transform.position, startPiece.boxCollider.size * 0.49f))
+                        {
+                            success = true;
+                            newConnector.setConnected(true);
+                            connector.setConnected(true);
+                            generatedObjects.Add(newPiece.gameObject);
+                            break;
+                        }
+                        newPiece.gameObject.transform.Rotate(0, 90, 0);
+                    }
+                    if (success)
+                    {
+                        break;
+                    }
+                }
+                if (!success)
+                {
+                    return;
+                    DestroyImmediate(newPiece.gameObject);
+                }
+                loops++;
+                // REALLY NEED TO IMPLEMENT SOMETHING FOR IF NO SUCCESS
+                // JUST LIKE ONE MORE COMMENT TO EXPRESS HOW IMPORTANT THIS IS
+                if (loops > 10)
+                {
+                    break;
+                }
+            } while (!success);
+            piecesLeft--;
+            if (newPiece)
+            {
+                populateConnections(newPiece, piecesLeft);
+            }
+        }
+        return;
+    }
+
+    // Unity's default intersection code considers two boxes that hug edges to be colliding, I don't want that
+    private bool intersects(Vector3 pos1, Vector3 extents1, Vector3 pos2, Vector3 extents2)
+    {
+        Vector3 min1 = pos1 - extents1;
+        Vector3 max1 = pos1 + extents1;
+        Vector3 min2 = pos2 - extents2;
+        Vector3 max2 = pos2 + extents2;
+        return min1.x < max2.x && max1.x > min2.x && min1.y < max2.y && max1.y > min2.y && min1.z < max2.z && max1.z > min2.z;
+    }
     private SnappablePiece getRandomPiece(List<SnappablePiece> list)
     {
         SnappablePiece piece = null;
@@ -64,7 +139,6 @@ public class LevelGenerator : MonoBehaviour
         piece = list[index];
         return piece;
     }
-
     private float getRandomRotation()
     {
         int rotID = Random.Range(0, 4);

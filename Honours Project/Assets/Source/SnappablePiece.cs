@@ -2,14 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(BoxCollider))]
 public class SnappablePiece : MonoBehaviour
 {
     [SerializeField] private List<Connector> connectors = new List<Connector>();
+    public BoxCollider boxCollider;
     // Start is called before the first frame update
     void Start()
     {
         populateConnectorList();
-        
+        boxCollider.isTrigger = true;
     }
 
     private void populateConnectorList()
@@ -24,6 +26,7 @@ public class SnappablePiece : MonoBehaviour
 
     public List<Connector> getConnectors()
     {
+        populateConnectorList();
         return connectors;
     }
 }

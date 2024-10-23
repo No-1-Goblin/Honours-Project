@@ -17,4 +17,5 @@ MonoBehaviour:
   endPieces:
   - {fileID: 5748930966876094117, guid: 73ddbd40e26aa1e4e92eb6687c4e0a91, type: 3}
   standardPieces:
-  - {fileID: 7191656779285061993, guid: b0da2dabd5ee94a43988b38f91637c89, type: 3}
+  - {fileID: 5997292806178487266, guid: b0da2dabd5ee94a43988b38f91637c89, type: 3}
+  - {fileID: 6215125889335771850, guid: 507a2c3b0a7685e4ea41e612349a8123, type: 3}
