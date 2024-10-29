@@ -76,10 +76,12 @@ public class LevelGenerator : MonoBehaviour
             {
                 // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
                 newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
-                List<Connector> newPieceConnectors = newPiece.getConnectors();
+                List<Connector> newPieceConnectors = new(newPiece.getConnectors());
                 // I should also randomise this tbh
-                foreach (Connector newConnector in newPieceConnectors)
+                while (newPieceConnectors.Count > 0)
                 {
+                    Connector newConnector = newPieceConnectors[Random.Range(0, newPieceConnectors.Count)];
+                    newPieceConnectors.Remove(newConnector);
                     for (int i = 0; i < 4; i++)
                     {
                         // Find amount to move by to make connectors touch
@@ -87,13 +89,16 @@ public class LevelGenerator : MonoBehaviour
                         newPiece.gameObject.transform.position += moveAmount;
                         Debug.Log(newPiece.boxCollider.bounds);
                         Debug.Log(startPiece.boxCollider.bounds);
-                        if (!intersects(newPiece.gameObject.transform.position, newPiece.boxCollider.size * 0.49f, startPiece.gameObject.transform.position, startPiece.boxCollider.size * 0.49f))
+                        if (!intersects(newPiece.boxCollider.transform.position, newPiece.boxCollider.size * 0.49f, startPiece.boxCollider.transform.position, startPiece.boxCollider.size * 0.49f))
                         {
                             success = true;
                             newConnector.setConnected(true);
                             connector.setConnected(true);
                             generatedObjects.Add(newPiece.gameObject);
                             break;
+                        } else
+                        {
+                            Debug.Log("Failed to place");
                         }
                         newPiece.gameObject.transform.Rotate(0, 90, 0);
                     }
