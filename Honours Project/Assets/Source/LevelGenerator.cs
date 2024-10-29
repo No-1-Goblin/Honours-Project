@@ -130,6 +130,8 @@ public class LevelGenerator : MonoBehaviour
     }
 
     // Unity's default intersection code considers two boxes that hug edges to be colliding, I don't want that
+    // This collision check is somewhat bugged however, as it does not account for rotation. I need to speak to Gaz about how to fix this
+    // Also because I'm feeding in 98% size box, y gets a lil messed up as well, need to fix that
     private bool intersects(Vector3 pos1, Vector3 extents1, Vector3 pos2, Vector3 extents2)
     {
         Vector3 min1 = pos1 - extents1;
