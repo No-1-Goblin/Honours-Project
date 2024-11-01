@@ -77,30 +77,31 @@ public class LevelGenerator : MonoBehaviour
                 // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
                 newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
                 List<Connector> newPieceConnectors = new(newPiece.getConnectors());
-                // I should also randomise this tbh
                 while (newPieceConnectors.Count > 0)
                 {
                     Connector newConnector = newPieceConnectors[Random.Range(0, newPieceConnectors.Count)];
                     newPieceConnectors.Remove(newConnector);
                     for (int i = 0; i < 4; i++)
                     {
+                        newPiece.gameObject.transform.rotation *= (getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal()));
                         // Find amount to move by to make connectors touch
                         Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
                         newPiece.gameObject.transform.position += moveAmount;
                         Debug.Log(newPiece.boxCollider.bounds);
                         Debug.Log(startPiece.boxCollider.bounds);
-                        if (!intersects(newPiece.boxCollider.transform.position, newPiece.boxCollider.size * 0.49f, startPiece.boxCollider.transform.position, startPiece.boxCollider.size * 0.49f))
-                        {
+                        /*if (!intersects(newPiece.boxCollider.transform.position, newPiece.boxCollider.size * 0.49f, startPiece.boxCollider.transform.position, startPiece.boxCollider.size * 0.49f))
+                        {*/
                             success = true;
                             newConnector.setConnected(true);
                             connector.setConnected(true);
                             generatedObjects.Add(newPiece.gameObject);
                             break;
+                        /*
                         } else
                         {
                             Debug.Log("Failed to place");
                         }
-                        newPiece.gameObject.transform.Rotate(0, 90, 0);
+                        newPiece.gameObject.transform.Rotate(0, 90, 0);*/
                     }
                     if (success)
                     {
@@ -110,7 +111,6 @@ public class LevelGenerator : MonoBehaviour
                 if (!success)
                 {
                     return;
-                    DestroyImmediate(newPiece.gameObject);
                 }
                 loops++;
                 // REALLY NEED TO IMPLEMENT SOMETHING FOR IF NO SUCCESS
@@ -127,6 +127,12 @@ public class LevelGenerator : MonoBehaviour
             }
         }
         return;
+    }
+
+    private Quaternion getAmountToRotate(Vector3 firstConnectorNormal, Vector3 secondConnectorNormal)
+    {
+        Quaternion rotationAmount = Quaternion.FromToRotation(secondConnectorNormal, -firstConnectorNormal);
+        return rotationAmount;
     }
 
     // Unity's default intersection code considers two boxes that hug edges to be colliding, I don't want that
