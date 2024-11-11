@@ -52,4 +52,11 @@ public class SnappablePiece : MonoBehaviour
         }
         return connectorDifferences;
     }
+
+    public Tuple<Tuple<int, int>, Vector3> getConnectorDifference(int startConnectorIndex, int endConnectorIndex)
+    {
+        List<Connector> connectorList = getConnectors();
+        Vector3 difference = connectorList[endConnectorIndex].transform.position - connectorList[startConnectorIndex].transform.position;
+        return new(new(startConnectorIndex, endConnectorIndex), difference);
+    }
 }
