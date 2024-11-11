@@ -6,6 +6,7 @@ public class Connector : MonoBehaviour
 {
     [SerializeField] private bool connected = false;
     [SerializeField] private GameObject internalConnector;
+    [SerializeField] private int index = -1;
     
     public void setConnected(bool isConnected)
     {
@@ -20,5 +21,14 @@ public class Connector : MonoBehaviour
     public Vector3 getConnectorNormal()
     {
         return transform.position - internalConnector.transform.position;
+    }
+    public void setIndex(int newIndex)
+    { 
+        index = newIndex;
+    }
+
+    public int getIndex()
+    {
+        return index;
     }
 }

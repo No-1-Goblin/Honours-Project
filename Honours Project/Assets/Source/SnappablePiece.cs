@@ -22,6 +22,7 @@ public class SnappablePiece : MonoBehaviour
         connectors.Clear();
         foreach (Connector connector in temp)
         {
+            connector.setIndex(connectors.Count);
             connectors.Add(connector);
         }
     }
@@ -45,7 +46,7 @@ public class SnappablePiece : MonoBehaviour
                     continue;
                 Connector connector2 = connectorList[j];
                 Vector3 difference = connector2.transform.position - connector.transform.position;
-                Tuple<Tuple<int, int>, Vector3> connectorDifference = new(new(i, j), difference);
+                Tuple<Tuple<int, int>, Vector3> connectorDifference = new(new(connector.getIndex(), connector2.getIndex()), difference);
                 connectorDifferences.Add(connectorDifference);
             }
         }
