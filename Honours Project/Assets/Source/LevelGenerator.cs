@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -54,7 +55,7 @@ public class LevelGenerator : MonoBehaviour
     private SnappablePiece generateStartPoint()
     {
         GameObject startPiece = Instantiate(getRandomPiece(settings.tileset.startPieces)).gameObject;
-        float rotation = getRandomRotation();
+        float rotation = 0;
         startPiece.transform.Rotate(new Vector3(0, rotation, 0));
         generatedObjects.Add(startPiece);
         return startPiece.GetComponent<SnappablePiece>();
@@ -75,22 +76,46 @@ public class LevelGenerator : MonoBehaviour
             do
             {
                 // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
-                newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
+                int generatorSetting = 0;
+                Vector3 targetPosition = new(0, 100, 0);
+                switch (generatorSetting)
+                {
+                    case 0:
+                        newPiece = Instantiate(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition)[0].Item1);
+                        Debug.Log("Start of list");
+                        var temp = getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition);
+                        foreach (var item in temp)
+                        {
+                            Debug.Log(item.Item2.ToString());
+                            Debug.Log(item.Item3.ToString());
+                        }
+                        break;
+                    default:
+                        newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
+                        break;
+                }
                 var connectorDifferences = newPiece.getConnectorDifferences();
                 List<Connector> newPieceConnectors = new(newPiece.getConnectors());
                 while (newPieceConnectors.Count > 0)
                 {
-                    Connector newConnector = newPieceConnectors[Random.Range(0, newPieceConnectors.Count)];
+                    Connector newConnector;
+                    switch (generatorSetting)
+                    {
+                        case 0:
+                            newConnector = newPiece.getConnectors()[newPiece.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1];
+                            break;
+                        default:
+                            newConnector = newPieceConnectors[UnityEngine.Random.Range(0, newPieceConnectors.Count)];
+                            break;
+                    }
                     newPieceConnectors.Remove(newConnector);
                     Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
-                    Debug.Log("Projected new piece connector position is: " + (connector.transform.position + (rotateAmount * newPiece.getConnectorDifference(newConnector.getIndex(), newPieceConnectors[0].getIndex()).Item2)));
                     newPiece.gameObject.transform.rotation *= rotateAmount;
                     // Find amount to move by to make connectors touch
                     Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
                     newPiece.gameObject.transform.position += moveAmount;
                     success = true;
                     newConnector.setConnected(true);
-                    Debug.Log("New connector position is: " + newPieceConnectors[0].transform.position.ToString());
                     connector.setConnected(true);
                     generatedObjects.Add(newPiece.gameObject);
                     break;
@@ -136,13 +161,13 @@ public class LevelGenerator : MonoBehaviour
     private SnappablePiece getRandomPiece(List<SnappablePiece> list)
     {
         SnappablePiece piece = null;
-        int index = Random.Range(0, list.Count);
+        int index = UnityEngine.Random.Range(0, list.Count);
         piece = list[index];
         return piece;
     }
     private float getRandomRotation()
     {
-        int rotID = Random.Range(0, 4);
+        int rotID = UnityEngine.Random.Range(0, 4);
         switch (rotID)
         {
             case 0:
@@ -155,6 +180,28 @@ public class LevelGenerator : MonoBehaviour
                 return 270;
         }
         return 0;
+    }
+
+    private List<Tuple<SnappablePiece, int, float>> getPieceListSortedByDistance(List<SnappablePiece> pieces, Connector lastConnector, Vector3 targetLocation)
+    {
+        List<Tuple<SnappablePiece, int, float>> sortedList = new();
+        foreach (SnappablePiece piece in pieces)
+        {
+            Tuple<int, int, float> optimalLayout = piece.getOptimalConnectorLayoutForDistance(lastConnector, targetLocation);
+            bool foundPosition = false;
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (optimalLayout.Item3 < sortedList[i].Item3)
+                {
+                    foundPosition = true;
+                    sortedList.Insert(i, new(piece, optimalLayout.Item1, optimalLayout.Item3));
+                    break;
+                }
+            }
+            if (!foundPosition)
+                sortedList.Add(new(piece, optimalLayout.Item1, optimalLayout.Item3));
+        }
+        return sortedList;
     }
 
     public void deleteLevel()
