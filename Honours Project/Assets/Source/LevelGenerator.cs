@@ -75,6 +75,11 @@ public class LevelGenerator : MonoBehaviour
             do
             {
                 // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
+                var temp = getRandomPiece(settings.tileset.standardPieces).getConnectorDifferences();
+                foreach (var item in temp)
+                {
+                    Debug.Log(item.Item1.Item1.ToString() + ", " + item.Item1.Item2.ToString() + ", " + item.Item2.ToString());
+                }
                 newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
                 List<Connector> newPieceConnectors = new(newPiece.getConnectors());
                 while (newPieceConnectors.Count > 0)
