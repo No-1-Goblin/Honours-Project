@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: d2529da90182b5149af5c3cda4e3d7c3, type: 2}
+  targetPosition: {x: 0, y: 0, z: 0}
 --- !u!4 &507922999
 Transform:
   m_ObjectHideFlags: 0

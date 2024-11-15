@@ -10,6 +10,7 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private GeneratorSettings settings;
     private List<GameObject> generatedObjects = new();
     private List<SnappablePiece> populationQueue = new();
+    public Vector3 targetPosition = new(-100, 0, -100);
 
     public GeneratorSettings getSettings()
     {
@@ -33,7 +34,6 @@ public class LevelGenerator : MonoBehaviour
         SnappablePiece startPiece = generateStartPoint();
         int generatedPieces = 0;
         populationQueue.Add(startPiece);
-        Vector3 targetPosition = new(-100, 0, -100);
         while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
         {
             populateConnections(populationQueue[0], targetPosition);
@@ -84,16 +84,16 @@ public class LevelGenerator : MonoBehaviour
             // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
             do
             {
-                var temp1 = getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition));
-                var temp2 = temp1.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1;
-                newPiece = Instantiate(temp1);
+                SnappablePiece pieceToGenerate = getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition));
+                int optimalConnector = pieceToGenerate.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1;
+                newPiece = Instantiate(pieceToGenerate);
                 List<Connector> newPieceConnectors = new(newPiece.getConnectors());
                 // THIS ALSO NEEDS FIXED AS IT WILL JUST NOT WORK AT THE MOMENT IF MORE THAN ONE AVAILABLE CONNECTOR
                 while (newPieceConnectors.Count > 0)
                 {
                     Connector newConnector;
                     // Need to fix this bit here to work with more than one available connector
-                    newConnector = newPiece.getConnectors()[temp2];
+                    newConnector = newPiece.getConnectors()[optimalConnector];
                     newPieceConnectors.Remove(newConnector);
                     // Figure out how to rotate piece to make connectors face each other
                     Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
