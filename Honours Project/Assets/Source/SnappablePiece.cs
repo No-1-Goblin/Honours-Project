@@ -64,7 +64,7 @@ public class SnappablePiece : MonoBehaviour
     public Vector3 getProjectedPosition(int startConnectorIndex, int endConnectorIndex, Connector connectingConnector)
     {
         Vector3 difference = getConnectorDifference(startConnectorIndex, endConnectorIndex).Item3;
-        Quaternion rotateAmount = Quaternion.FromToRotation(getConnectors()[startConnectorIndex].getConnectorNormal(), connectingConnector.getConnectorNormal());
+        Quaternion rotateAmount = Quaternion.FromToRotation(getConnectors()[startConnectorIndex].getConnectorNormal(), -connectingConnector.getConnectorNormal());
         return connectingConnector.transform.position + (rotateAmount * difference);
     }
 

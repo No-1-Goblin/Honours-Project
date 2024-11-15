@@ -10,7 +10,7 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private GeneratorSettings settings;
     private List<GameObject> generatedObjects = new();
     private List<SnappablePiece> populationQueue = new();
-    public Vector3 targetPosition = new(-100, 0, -100);
+    public Vector3 targetPos = new(0, 0, 0);
 
     public GeneratorSettings getSettings()
     {
@@ -36,7 +36,7 @@ public class LevelGenerator : MonoBehaviour
         populationQueue.Add(startPiece);
         while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
         {
-            populateConnections(populationQueue[0], targetPosition);
+            populateConnections(populationQueue[0], targetPos);
             populationQueue.RemoveAt(0);
             generatedPieces++;
         }
@@ -200,7 +200,7 @@ public class LevelGenerator : MonoBehaviour
         return 0;
     }
 
-    /*private List<Tuple<SnappablePiece, int, float>> getPieceListSortedByDistance(List<SnappablePiece> pieces, Connector lastConnector, Vector3 targetLocation)
+    private List<Tuple<SnappablePiece, int, float>> getPieceListSortedByDistanceWithDetails(List<SnappablePiece> pieces, Connector lastConnector, Vector3 targetLocation)
     {
         List<Tuple<SnappablePiece, int, float>> sortedList = new();
         foreach (SnappablePiece piece in pieces)
@@ -220,7 +220,7 @@ public class LevelGenerator : MonoBehaviour
                 sortedList.Add(new(piece, optimalLayout.Item1, optimalLayout.Item3));
         }
         return sortedList;
-    }*/
+    }
 
     private List<SnappablePiece> getPieceListSortedByDistance(List<SnappablePiece> pieces, Connector lastConnector, Vector3 targetLocation)
     {
