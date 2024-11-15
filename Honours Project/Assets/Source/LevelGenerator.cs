@@ -33,7 +33,7 @@ public class LevelGenerator : MonoBehaviour
         SnappablePiece startPiece = generateStartPoint();
         int generatedPieces = 0;
         populationQueue.Add(startPiece);
-        Vector3 targetPosition = new(0, 100, 0);
+        Vector3 targetPosition = new(-100, 0, -100);
         while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
         {
             populateConnections(populationQueue[0], targetPosition);
@@ -70,8 +70,9 @@ public class LevelGenerator : MonoBehaviour
         return startPiece.GetComponent<SnappablePiece>();
     }
 
-    private void populateConnections(SnappablePiece startPiece, Vector3 targetPosition)
+    private bool populateConnections(SnappablePiece startPiece, Vector3 targetPosition)
     {
+        bool gotCloser = false;
         List<Connector> connectors = startPiece.getConnectors();
         foreach (Connector connector in connectors)
         {
@@ -83,28 +84,35 @@ public class LevelGenerator : MonoBehaviour
             // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
             do
             {
-                newPiece = Instantiate(getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition)));
+                var temp1 = getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition));
+                var temp2 = temp1.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1;
+                newPiece = Instantiate(temp1);
                 List<Connector> newPieceConnectors = new(newPiece.getConnectors());
                 // THIS ALSO NEEDS FIXED AS IT WILL JUST NOT WORK AT THE MOMENT IF MORE THAN ONE AVAILABLE CONNECTOR
                 while (newPieceConnectors.Count > 0)
                 {
                     Connector newConnector;
-                    newConnector = newPiece.getConnectors()[newPiece.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1];
+                    // Need to fix this bit here to work with more than one available connector
+                    newConnector = newPiece.getConnectors()[temp2];
                     newPieceConnectors.Remove(newConnector);
+                    // Figure out how to rotate piece to make connectors face each other
                     Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
                     newPiece.gameObject.transform.rotation *= rotateAmount;
                     // Find amount to move by to make connectors touch
                     Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
                     newPiece.gameObject.transform.position += moveAmount;
+                    // This isn't actually doing what it should right now
                     success = true;
                     newConnector.setConnected(true);
                     connector.setConnected(true);
                     generatedObjects.Add(newPiece.gameObject);
                     break;
                 }
+                // Need to add actual error handling here
                 if (!success)
                 {
-                    return;
+                    DestroyImmediate(newPiece);
+                    break;
                 }
                 loops++;
                 // REALLY NEED TO IMPLEMENT SOMETHING FOR IF NO SUCCESS
@@ -116,9 +124,14 @@ public class LevelGenerator : MonoBehaviour
             } while (!success);
             if (newPiece)
             {
+                float prevDistance = (targetPosition - startPiece.transform.position).sqrMagnitude;
+                float newDistance = (targetPosition - newPiece.transform.position).sqrMagnitude;
+                if (newDistance < prevDistance)
+                    gotCloser = true;
                 populationQueue.Add(newPiece);
             }
         }
+        return gotCloser;
     }
 
     private Quaternion getAmountToRotate(Vector3 firstConnectorNormal, Vector3 secondConnectorNormal)
