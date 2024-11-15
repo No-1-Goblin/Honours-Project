@@ -9,7 +9,8 @@ public class LevelGenerator : MonoBehaviour
 {
     [SerializeField] private GeneratorSettings settings;
     private List<GameObject> generatedObjects = new();
-    
+    private List<SnappablePiece> populationQueue = new();
+
     public GeneratorSettings getSettings()
     {
         return settings;
@@ -30,7 +31,14 @@ public class LevelGenerator : MonoBehaviour
             return;
         }
         SnappablePiece startPiece = generateStartPoint();
-        populateConnections(startPiece, settings.maxParts);
+        int generatedPieces = 0;
+        populationQueue.Add(startPiece);
+        while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
+        {
+            populateConnections(populationQueue[0]);
+            populationQueue.RemoveAt(0);
+            generatedPieces++;
+        }
     }
 
     private bool validateGeneratorSettings()
@@ -61,10 +69,8 @@ public class LevelGenerator : MonoBehaviour
         return startPiece.GetComponent<SnappablePiece>();
     }
 
-    private void populateConnections(SnappablePiece startPiece, int piecesLeft)
+    private void populateConnections(SnappablePiece startPiece)
     {
-        if (piecesLeft <= 0)
-            return;
         List<Connector> connectors = startPiece.getConnectors();
         foreach (Connector connector in connectors)
         {
@@ -125,13 +131,11 @@ public class LevelGenerator : MonoBehaviour
                     break;
                 }
             } while (!success);
-            piecesLeft--;
             if (newPiece)
             {
-                populateConnections(newPiece, piecesLeft);
+                populationQueue.Add(newPiece);
             }
         }
-        return;
     }
 
     private Quaternion getAmountToRotate(Vector3 firstConnectorNormal, Vector3 secondConnectorNormal)
@@ -260,6 +264,14 @@ public class LevelGenerator : MonoBehaviour
                 DestroyImmediate(generatedObjects[0]);
             }
             generatedObjects.RemoveAt(0);
+        }
+        while (populationQueue.Count > 0)
+        {
+            if (populationQueue[0])
+            {
+                DestroyImmediate(populationQueue[0]);
+            }
+            populationQueue.RemoveAt(0);
         }
     }
 }
