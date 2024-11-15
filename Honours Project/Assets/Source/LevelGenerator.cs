@@ -33,9 +33,10 @@ public class LevelGenerator : MonoBehaviour
         SnappablePiece startPiece = generateStartPoint();
         int generatedPieces = 0;
         populationQueue.Add(startPiece);
+        Vector3 targetPosition = new(0, 100, 0);
         while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
         {
-            populateConnections(populationQueue[0]);
+            populateConnections(populationQueue[0], targetPosition);
             populationQueue.RemoveAt(0);
             generatedPieces++;
         }
@@ -63,13 +64,13 @@ public class LevelGenerator : MonoBehaviour
     private SnappablePiece generateStartPoint()
     {
         GameObject startPiece = Instantiate(getRandomPiece(settings.tileset.startPieces)).gameObject;
-        float rotation = 0;
+        float rotation = getRandomRotation();
         startPiece.transform.Rotate(new Vector3(0, rotation, 0));
         generatedObjects.Add(startPiece);
         return startPiece.GetComponent<SnappablePiece>();
     }
 
-    private void populateConnections(SnappablePiece startPiece)
+    private void populateConnections(SnappablePiece startPiece, Vector3 targetPosition)
     {
         List<Connector> connectors = startPiece.getConnectors();
         foreach (Connector connector in connectors)
@@ -79,34 +80,16 @@ public class LevelGenerator : MonoBehaviour
             bool success = false;
             SnappablePiece newPiece;
             int loops = 0;
+            // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
             do
             {
-                // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
-                int generatorSetting = 0;
-                Vector3 targetPosition = new(0, 100, 0);
-                switch (generatorSetting)
-                {
-                    case 0:
-                        newPiece = Instantiate(getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition)));
-                        break;
-                    default:
-                        newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
-                        break;
-                }
-                var connectorDifferences = newPiece.getConnectorDifferences();
+                newPiece = Instantiate(getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition)));
                 List<Connector> newPieceConnectors = new(newPiece.getConnectors());
+                // THIS ALSO NEEDS FIXED AS IT WILL JUST NOT WORK AT THE MOMENT IF MORE THAN ONE AVAILABLE CONNECTOR
                 while (newPieceConnectors.Count > 0)
                 {
                     Connector newConnector;
-                    switch (generatorSetting)
-                    {
-                        case 0:
-                            newConnector = newPiece.getConnectors()[newPiece.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1];
-                            break;
-                        default:
-                            newConnector = newPieceConnectors[UnityEngine.Random.Range(0, newPieceConnectors.Count)];
-                            break;
-                    }
+                    newConnector = newPiece.getConnectors()[newPiece.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1];
                     newPieceConnectors.Remove(newConnector);
                     Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
                     newPiece.gameObject.transform.rotation *= rotateAmount;

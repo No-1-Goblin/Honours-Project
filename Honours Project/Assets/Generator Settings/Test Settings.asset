@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileset: {fileID: 11400000, guid: 0c222be70b2cb914d8de8e2b6f1e4942, type: 2}
   minParts: 1
-  maxParts: 50
+  maxParts: 100
