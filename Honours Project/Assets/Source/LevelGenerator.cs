@@ -81,14 +81,7 @@ public class LevelGenerator : MonoBehaviour
                 switch (generatorSetting)
                 {
                     case 0:
-                        newPiece = Instantiate(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition)[0].Item1);
-                        Debug.Log("Start of list");
-                        var temp = getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition);
-                        foreach (var item in temp)
-                        {
-                            Debug.Log(item.Item2.ToString());
-                            Debug.Log(item.Item3.ToString());
-                        }
+                        newPiece = Instantiate(getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition)));
                         break;
                     default:
                         newPiece = Instantiate(getRandomPiece(settings.tileset.standardPieces));
@@ -165,6 +158,31 @@ public class LevelGenerator : MonoBehaviour
         piece = list[index];
         return piece;
     }
+    private SnappablePiece getRandomPieceWithLinearWeighting(List<SnappablePiece> list)
+    {
+        if (list.Count == 0)
+            return null;
+        SnappablePiece piece = null;
+        List<int> weightingList = new();
+        int weightingsTotal = 0;
+        for (int i = 0; i < list.Count; i++)
+        {
+            weightingList.Add(i + weightingsTotal);
+            weightingsTotal += i;
+        }
+        int randomValue = UnityEngine.Random.Range(0, weightingsTotal);
+        for (int i = 0; i < weightingList.Count; i++)
+        {
+            if (randomValue <= weightingList[i])
+            {
+                piece = list[list.Count - 1 - i];
+                break;
+            }
+        }
+        if (piece == null)
+            piece = list[0];
+        return piece;
+    }
     private float getRandomRotation()
     {
         int rotID = UnityEngine.Random.Range(0, 4);
@@ -182,7 +200,7 @@ public class LevelGenerator : MonoBehaviour
         return 0;
     }
 
-    private List<Tuple<SnappablePiece, int, float>> getPieceListSortedByDistance(List<SnappablePiece> pieces, Connector lastConnector, Vector3 targetLocation)
+    /*private List<Tuple<SnappablePiece, int, float>> getPieceListSortedByDistance(List<SnappablePiece> pieces, Connector lastConnector, Vector3 targetLocation)
     {
         List<Tuple<SnappablePiece, int, float>> sortedList = new();
         foreach (SnappablePiece piece in pieces)
@@ -202,6 +220,33 @@ public class LevelGenerator : MonoBehaviour
                 sortedList.Add(new(piece, optimalLayout.Item1, optimalLayout.Item3));
         }
         return sortedList;
+    }*/
+
+    private List<SnappablePiece> getPieceListSortedByDistance(List<SnappablePiece> pieces, Connector lastConnector, Vector3 targetLocation)
+    {
+        List<Tuple<SnappablePiece, int, float>> sortedList = new();
+        foreach (SnappablePiece piece in pieces)
+        {
+            Tuple<int, int, float> optimalLayout = piece.getOptimalConnectorLayoutForDistance(lastConnector, targetLocation);
+            bool foundPosition = false;
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (optimalLayout.Item3 < sortedList[i].Item3)
+                {
+                    foundPosition = true;
+                    sortedList.Insert(i, new(piece, optimalLayout.Item1, optimalLayout.Item3));
+                    break;
+                }
+            }
+            if (!foundPosition)
+                sortedList.Add(new(piece, optimalLayout.Item1, optimalLayout.Item3));
+        }
+        List<SnappablePiece> pieceOnlyList = new();
+        foreach (var item in sortedList)
+        {
+            pieceOnlyList.Add(item.Item1);
+        }
+        return pieceOnlyList;
     }
 
     public void deleteLevel()
