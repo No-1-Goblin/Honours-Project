@@ -291,6 +291,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eac03c6ecaa49994baad88e62fc3b970, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sizeX: 5
+  sizeY: 5
+  tileset: {fileID: 11400000, guid: 869f7df674f35ec4ca5d4930ae503aef, type: 2}
 --- !u!4 &941303097
 Transform:
   m_ObjectHideFlags: 0
