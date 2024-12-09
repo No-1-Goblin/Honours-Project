@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3b7f2d62d7dfc14f883323499191cb0, type: 3}
+  m_Name: Test WFC Tileset
+  m_EditorClassIdentifier: 
+  tiles:
+  - {fileID: 1113823768972398510, guid: 42af088cecbc59f46892b86e45cb5e06, type: 3}
+  - {fileID: 4099613331215164915, guid: 2ac7dd021693bb84c8960efa861deb00, type: 3}
