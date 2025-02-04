@@ -11,11 +11,26 @@ public class WaveFunctionCollapse : MonoBehaviour
     public int sizeY = 5;
     public WFCTileset tileset;
     private List<int>[,] intMatrix;
+    private List<GameObject> spawnedObjects;
+    public void deleteSpawnedObjects()
+    {
+        // Destroy all generated level elements
+        while (spawnedObjects.Count > 0)
+        {
+            if (spawnedObjects[0])
+            {
+                // Destroy immediate so it works in editor
+                DestroyImmediate(spawnedObjects[0]);
+            }
+            spawnedObjects.RemoveAt(0);
+        }
+        // Create matrix
+        intMatrix = new List<int>[sizeX, sizeY];
+    }
 
     public void generateWFCMatrix()
     {
-        // Create matrix
-        intMatrix = new List<int>[sizeX, sizeY];
+        deleteSpawnedObjects();
         // Add lists
         for (int x = 0; x < sizeX; x++)
         {
@@ -73,6 +88,13 @@ public class WaveFunctionCollapse : MonoBehaviour
             output += "\n";
         }
         Debug.Log(output);
+        for (int y = sizeY - 1; y >= 0; y--)
+        {
+            for (int x = 0; x < sizeX; x++)
+            {
+                spawnedObjects.Add(Instantiate(tileset.tiles[intMatrix[x, y][0]], new Vector3(x, 0, y), Quaternion.identity, gameObject.transform).gameObject);
+            }
+        }
     }
 
     int updatePossibilities()
@@ -152,6 +174,10 @@ public class WaveFunctionCollapseEditor : Editor
         if (GUILayout.Button("Generate WFC Matrix"))
         {
             waveFunctionCollapse.generateWFCMatrix();
+        }
+        if (GUILayout.Button("Delete WFC Matrix"))
+        {
+            waveFunctionCollapse.deleteSpawnedObjects();
         }
     }
 }
