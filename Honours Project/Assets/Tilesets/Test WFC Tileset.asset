@@ -16,3 +16,4 @@ MonoBehaviour:
   - {fileID: 1113823768972398510, guid: 42af088cecbc59f46892b86e45cb5e06, type: 3}
   - {fileID: 4099613331215164915, guid: 2ac7dd021693bb84c8960efa861deb00, type: 3}
   - {fileID: 385033496783332094, guid: 489b210da219f2d47a9823af87149b0b, type: 3}
+  tileSize: {x: 1, y: 1}

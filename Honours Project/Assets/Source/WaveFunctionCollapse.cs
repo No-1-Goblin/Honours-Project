@@ -92,7 +92,7 @@ public class WaveFunctionCollapse : MonoBehaviour
         {
             for (int x = 0; x < sizeX; x++)
             {
-                spawnedObjects.Add(Instantiate(tileset.tiles[intMatrix[x, y][0]], new Vector3(x, 0, y), Quaternion.identity, gameObject.transform).gameObject);
+                spawnedObjects.Add(Instantiate(tileset.tiles[intMatrix[x, y][0]], new Vector3(x * tileset.tileSize.x, 0, y * tileset.tileSize.y), Quaternion.identity, gameObject.transform).gameObject);
             }
         }
     }

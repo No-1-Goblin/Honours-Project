@@ -6,4 +6,5 @@ using UnityEngine;
 public class WFCTileset : ScriptableObject
 {
     public List<WFCTile> tiles = new();
+    public Vector2 tileSize = Vector2.one;
 }
