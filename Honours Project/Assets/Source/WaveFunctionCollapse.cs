@@ -10,6 +10,8 @@ public class WaveFunctionCollapse : MonoBehaviour
     public int sizeX = 5;
     public int sizeY = 5;
     public WFCTileset tileset;
+    public bool rejectFailedAttempts = true;
+    public bool logDebugStatements = false;
     private List<int>[,] intMatrix;
     private List<GameObject> spawnedObjects;
     public void deleteSpawnedObjects()
@@ -26,6 +28,7 @@ public class WaveFunctionCollapse : MonoBehaviour
         }
         // Create matrix
         intMatrix = new List<int>[sizeX, sizeY];
+
     }
 
     public void generateWFCMatrix()
@@ -53,45 +56,64 @@ public class WaveFunctionCollapse : MonoBehaviour
             collapseLowestEntropy();
             undetermined = updatePossibilities();
             // This here is for debugging purposes, remove this later
-            string output1 = "";
+            if (logDebugStatements)
+            {
+                string output1 = "";
+                for (int y = sizeY - 1; y >= 0; y--)
+                {
+                    for (int x = 0; x < sizeX; x++)
+                    {
+                        if (intMatrix[x, y].Count == 1)
+                        {
+                            output1 += intMatrix[x, y][0].ToString() + ", ";
+                        }
+                        else
+                        {
+                            output1 += " ,  ";
+                        }
+                    }
+                    output1 += "\n";
+                }
+                Debug.Log(output1);
+            }
+            // Check if we failed to generate the matrix
+            if (undetermined == -1)
+            {
+                if (logDebugStatements)
+                Debug.Log("It all went wrong");
+                if (rejectFailedAttempts)
+                {
+                    generateWFCMatrix();
+                    return;
+                }
+            }
+        }
+        if (logDebugStatements)
+        {
+            // This is also for debug, since later this matrix will be used to generate the actual room
+            string output = "";
             for (int y = sizeY - 1; y >= 0; y--)
             {
                 for (int x = 0; x < sizeX; x++)
                 {
                     if (intMatrix[x, y].Count == 1)
                     {
-                        output1 += intMatrix[x, y][0].ToString() + ", ";
-                    } else
+                        output += intMatrix[x, y][0].ToString() + ", ";
+                    }
+                    else
                     {
-                        output1 += " ,  ";
+                        output += "X, ";
                     }
                 }
-                output1 += "\n";
+                output += "\n";
             }
-            Debug.Log(output1);
-            // Check if we failed to generate the matrix
-            if (undetermined == -1)
-            {
-                Debug.Log("It all went wrong");
-                generateWFCMatrix();
-                return;
-            }
+            Debug.Log(output);
         }
-        // This is also for debug, since later this matrix will be used to generate the actual room
-        string output = "";
         for (int y = sizeY - 1; y >= 0; y--)
         {
             for (int x = 0; x < sizeX; x++)
             {
-                output += intMatrix[x, y][0].ToString() + ", ";
-            }
-            output += "\n";
-        }
-        Debug.Log(output);
-        for (int y = sizeY - 1; y >= 0; y--)
-        {
-            for (int x = 0; x < sizeX; x++)
-            {
+                if (intMatrix[x, y].Count > 0)
                 spawnedObjects.Add(Instantiate(tileset.tiles[intMatrix[x, y][0]], new Vector3(x * tileset.tileSize.x, 0, y * tileset.tileSize.y), Quaternion.identity, gameObject.transform).gameObject);
             }
         }
@@ -107,7 +129,7 @@ public class WaveFunctionCollapse : MonoBehaviour
             {
                 List<int> possibilities = intMatrix[x, y];
                 // Skip if already determined
-                if (possibilities.Count == 1)
+                if (possibilities.Count <= 1)
                     continue;
                 for (int i = possibilities.Count - 1; i >= 0; i--)
                 {
@@ -119,9 +141,36 @@ public class WaveFunctionCollapse : MonoBehaviour
                 // This means we failed to generate the matrix, I could add proper handling here but for now we just reroll the whole thing
                 // A.k.a make sure the rules *can* produce a possible outcome
                 if (possibilities.Count == 0)
-                    return -1;
+                    if (rejectFailedAttempts)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 if (possibilities.Count > 1)
                     undeterminedTiles++;
+                if (logDebugStatements)
+                {
+                    string output = "";
+                    for (int a = sizeY - 1; a >= 0; a--)
+                    {
+                        for (int b = 0; b < sizeX; b++)
+                        {
+                            if (intMatrix[b, a].Count == 1)
+                            {
+                                output += intMatrix[b, a][0].ToString() + ", ";
+                            }
+                            else
+                            {
+                                output += "X, ";
+                            }
+                        }
+                        output += "\n";
+                    }
+                    Debug.Log(output);
+                }
             }
         }
         return undeterminedTiles;
@@ -148,6 +197,7 @@ public class WaveFunctionCollapse : MonoBehaviour
         // Sort by entropy (but since we randomised the list this won't give us the same order of collapse every time)
         entropyAtPosition.OrderBy(x => x.Item3);
         // Collapse the lowest entropy
+        //if (entropyAtPosition.Count > 0)
         collapse(new Tuple<int, int>(entropyAtPosition[0].Item1, entropyAtPosition[0].Item2));
     }
 

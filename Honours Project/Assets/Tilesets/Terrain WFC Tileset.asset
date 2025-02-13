@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3b7f2d62d7dfc14f883323499191cb0, type: 3}
+  m_Name: Terrain WFC Tileset
+  m_EditorClassIdentifier: 
+  tiles:
+  - {fileID: 3286309317070659368, guid: be2440c7d5f26484fb032fb6720f0e59, type: 3}
+  - {fileID: 3980562014440102567, guid: e02927b5c3f62574882886aaf5bbd4cd, type: 3}
+  - {fileID: -734685787116398404, guid: a32f882e1e9f6004eb8eccbab038e2e6, type: 3}
+  - {fileID: 412954102045854273, guid: 9233306b2f3130441bee026da85bcb94, type: 3}
+  - {fileID: 4939774877754019901, guid: 1b4205f6f2bad7948b506042d452fd9b, type: 3}
+  - {fileID: -2333894298538694406, guid: 652a7e0cddf7afd44a4e3c0a8d6a9325, type: 3}
+  - {fileID: -4301979689352590641, guid: af971e6c3195d1f469d71f56de0b7c7b, type: 3}
+  - {fileID: -4909676440470843683, guid: abf33c2b010165c438405bd3105e2ac0, type: 3}
+  - {fileID: 7210677187729054466, guid: ca8051fab2e90f142b7461de9e135ec6, type: 3}
+  - {fileID: -4882660618063111306, guid: f266a5511a8997745827fd32ef0c419a, type: 3}
+  tileSize: {x: 2, y: 2}
