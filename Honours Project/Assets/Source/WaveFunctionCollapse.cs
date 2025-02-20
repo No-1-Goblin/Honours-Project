@@ -16,6 +16,10 @@ public class WaveFunctionCollapse : MonoBehaviour
     private List<GameObject> spawnedObjects;
     public void deleteSpawnedObjects()
     {
+        if (spawnedObjects == null)
+        {
+            spawnedObjects = new();
+        }
         // Destroy all generated level elements
         while (spawnedObjects.Count > 0)
         {
@@ -28,7 +32,6 @@ public class WaveFunctionCollapse : MonoBehaviour
         }
         // Create matrix
         intMatrix = new List<int>[sizeX, sizeY];
-
     }
 
     public void generateWFCMatrix()

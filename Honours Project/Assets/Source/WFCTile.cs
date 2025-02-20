@@ -74,6 +74,25 @@ public class WFCTile : MonoBehaviour
         return true;
     }
 
+    // Check whether the tile is definitely of one of the types
+    public bool isDeterminedAsOneOfTypes(List<WFCTile> possibilities, List<Type> types)
+    {
+        if (possibilities == null)
+            return false;
+        if (possibilities.Count != 1)
+            return false;
+        if (types == null)
+            return false;
+        if (types.Count < 1)
+            return false;
+        foreach (Type type in types)
+        {
+            if (possibilities[0].GetType() == type)
+                return true;
+        }
+        return false;
+    }
+
     // Check whether the tile can be of that type (this is probably risky to use due to only doing one pass on checking possibilities)
     public bool canBeOfType(List<WFCTile> possibilities, Type type)
     {
