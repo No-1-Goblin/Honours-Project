@@ -8,11 +8,12 @@ public class TopEdgeWFCTile : WFCTile
     public override bool checkTileRule(List<int>[,] matrix, int sizeX, int sizeY, WFCTileset tileset, Tuple<int, int> position)
     {
         var adjacents = getAdjacents(matrix, sizeX, sizeY, tileset, position);
-        List<Type> edges = new() { typeof(BLOuterCornerWFCTile), typeof(BottomEdgeWFCTile), typeof(BROuterCornerWFCTile), typeof(LeftEdgeWFCTile), typeof(RightEdgeWFCTile), typeof(TLOuterCornerWFCTile), typeof(TopEdgeWFCTile), typeof(TROuterCornerWFCTile), typeof(BLInnerCornerWFCTile), typeof(BRInnerCornerWFCTile), typeof(TLInnerCornerWFCTile), typeof(TRInnerCornerWFCTile) };
-        // Bottom must not be an edge tile
+        List<Type> edges = new() { typeof(BLOuterCornerWFCTile), typeof(BottomEdgeWFCTile), typeof(BROuterCornerWFCTile), typeof(LeftEdgeWFCTile), typeof(RightEdgeWFCTile), typeof(TLOuterCornerWFCTile), typeof(TopEdgeWFCTile), typeof(TROuterCornerWFCTile), typeof(BLInnerCornerWFCTile), typeof(BRInnerCornerWFCTile), typeof(TLInnerCornerWFCTile), typeof(TRInnerCornerWFCTile), typeof(EmptyWFCTile) };
+        // Bottom must not be an edge tile or empty
         if (isDeterminedAsOneOfTypes(adjacents[WFCDirections.down], edges))
             return false;
         // Top must not be an edge tile or floor
+        edges.RemoveAt(edges.Count - 1);
         edges.Add(typeof(FloorWFCTile));
         if (isDeterminedAsOneOfTypes(adjacents[WFCDirections.up], edges))
             return false;

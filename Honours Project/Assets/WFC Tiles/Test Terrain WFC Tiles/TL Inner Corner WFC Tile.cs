@@ -8,11 +8,11 @@ public class TLInnerCornerWFCTile : WFCTile
     public override bool checkTileRule(List<int>[,] matrix, int sizeX, int sizeY, WFCTileset tileset, Tuple<int, int> position)
     {
         var adjacents = getAdjacents(matrix, sizeX, sizeY, tileset, position);
-        List<Type> edges = new() { typeof(BLOuterCornerWFCTile), typeof(BottomEdgeWFCTile), typeof(BROuterCornerWFCTile), typeof(LeftEdgeWFCTile), typeof(RightEdgeWFCTile), typeof(TLOuterCornerWFCTile), typeof(TopEdgeWFCTile), typeof(TROuterCornerWFCTile), typeof(BLInnerCornerWFCTile), typeof(BRInnerCornerWFCTile), typeof(TLInnerCornerWFCTile), typeof(TRInnerCornerWFCTile) };
-        // Bottom must not be an edge
+        List<Type> edges = new() { typeof(BLOuterCornerWFCTile), typeof(BottomEdgeWFCTile), typeof(BROuterCornerWFCTile), typeof(LeftEdgeWFCTile), typeof(RightEdgeWFCTile), typeof(TLOuterCornerWFCTile), typeof(TopEdgeWFCTile), typeof(TROuterCornerWFCTile), typeof(BLInnerCornerWFCTile), typeof(BRInnerCornerWFCTile), typeof(TLInnerCornerWFCTile), typeof(TRInnerCornerWFCTile), typeof(EmptyWFCTile) };
+        // Bottom must not be an edge or empty
         if (isDeterminedAsOneOfTypes(adjacents[WFCDirections.down], edges))
             return false;
-        // Right must not be an edge
+        // Right must not be an edge or empty
         if (isDeterminedAsOneOfTypes(adjacents[WFCDirections.right], edges))
             return false;
         // Left must be able to be top edge
