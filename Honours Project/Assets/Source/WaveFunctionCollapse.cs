@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class WaveFunctionCollapse : MonoBehaviour
 {
+    public GameObject connectorPrefab;
     public int sizeX = 5;
     public int sizeY = 5;
     public WFCTileset tileset;
@@ -14,11 +15,118 @@ public class WaveFunctionCollapse : MonoBehaviour
     public bool logDebugStatements = false;
     private List<int>[,] intMatrix;
     private List<GameObject> spawnedObjects;
+    private SnappablePiece snappablePiece;
+
+    public void generateRoom()
+    {
+        generateWFCMatrix();
+        Tuple<Vector2Int, Vector2Int> edges = findEdges();
+        if (edges == null)
+        {
+            Debug.Log("Failed to find edges");
+            return;
+        }
+        snappablePiece = GetComponent<SnappablePiece>();
+        if (snappablePiece == null )
+        {
+            Debug.Log("Snappable piece component required to generate room. Add snappable piece or generate matrix instead");
+            return;
+        }
+        if (connectorPrefab == null)
+        {
+            Debug.Log("No connector prefab set. Set prefab in the editor");
+            return;
+        }
+        GameObject topConnector = Instantiate(connectorPrefab, transform);
+        GameObject bottomConnector = Instantiate(connectorPrefab, transform);
+        snappablePiece.populateConnectorList();
+        topConnector.transform.position = new Vector3(edges.Item1.x * tileset.tileSize.x + tileset.tileSize.x * 0.5f, 0,  edges.Item1.y * tileset.tileSize.y + tileset.tileSize.y * 0.5f);
+        bottomConnector.transform.position = new Vector3(edges.Item2.x * tileset.tileSize.x + tileset.tileSize.x * 0.5f, 0, edges.Item2.y * tileset.tileSize.y);
+
+    }
+
+    public Tuple<Vector2Int, Vector2Int> findEdges()
+    {
+        int edgeID;
+        bool foundEdge;
+        List<Vector2Int> edges;
+
+        // Top edge
+        edges = new();
+        foundEdge = false;
+        edgeID = findIndexForTileOfType(typeof(TopEdgeWFCTile));
+        if (edgeID == -1)
+        {
+            Debug.Log("Failed to find top edge in tileset");
+            return null;
+        }
+        for (int y = sizeY - 1; y >= 0; y--)
+        {
+            if (foundEdge)
+                break;
+            for (int x = 0; x < sizeX; x++)
+            {
+                if (intMatrix[x, y][0] == edgeID)
+                {
+                    foundEdge = true;
+                    edges.Add(new(x, y));
+                }
+            }
+        }
+        if (!foundEdge)
+        {
+            Debug.Log("Failed to find a top edge in the generated matrix");
+            return null;
+        }
+        Vector2Int topEdge = edges[UnityEngine.Random.Range(0, edges.Count)];
+
+        // Bottom edge
+        edges = new();
+        foundEdge = false;
+        edgeID = findIndexForTileOfType(typeof(BottomEdgeWFCTile));
+        if (edgeID == -1)
+        {
+            Debug.Log("Failed to find bottom edge in tileset");
+            return null;
+        }
+        for (int y = 0; y < sizeY; y++)
+        {
+            if (foundEdge)
+                break;
+            for (int x = 0; x < sizeX; x++)
+            {
+                if (intMatrix[x, y][0] == edgeID)
+                {
+                    foundEdge = true;
+                    edges.Add(new(x, y));
+                }
+            }
+        }
+        if (!foundEdge)
+        {
+            Debug.Log("Failed to find a bottom edge in the generated matrix");
+            return null;
+        }
+        Vector2Int bottomEdge = edges[UnityEngine.Random.Range(0, edges.Count)];
+        return new(topEdge, bottomEdge);
+    }
     public void deleteSpawnedObjects()
     {
         if (spawnedObjects == null)
         {
             spawnedObjects = new();
+        }
+        SnappablePiece snappablePiece = GetComponent<SnappablePiece>();
+        if (snappablePiece != null)
+        {
+            snappablePiece.populateConnectorList();
+            var connectors = snappablePiece.getConnectors();
+            foreach (Connector connector in connectors)
+            {
+                if (connector != null)
+                    DestroyImmediate(connector.gameObject);
+            }
+            snappablePiece.populateConnectorList();
         }
         // Destroy all generated level elements
         while (spawnedObjects.Count > 0)
@@ -215,6 +323,20 @@ public class WaveFunctionCollapse : MonoBehaviour
             possibilities.RemoveAt(randomInt);
         }
     }
+
+    int findIndexForTileOfType(Type type)
+    {
+        int index = -1;
+        for (int i = 0; i < tileset.tiles.Count; i++)
+        {
+            if (tileset.tiles[i].GetType() == type)
+            {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
 }
 
 [CustomEditor(typeof(WaveFunctionCollapse))]
@@ -228,7 +350,11 @@ public class WaveFunctionCollapseEditor : Editor
         {
             waveFunctionCollapse.generateWFCMatrix();
         }
-        if (GUILayout.Button("Delete WFC Matrix"))
+        if (GUILayout.Button("Generate Room"))
+        {
+            waveFunctionCollapse.generateRoom();
+        }
+        if (GUILayout.Button("Delete"))
         {
             waveFunctionCollapse.deleteSpawnedObjects();
         }

@@ -291,6 +291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eac03c6ecaa49994baad88e62fc3b970, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectorPrefab: {fileID: 0}
   sizeX: 10
   sizeY: 10
   tileset: {fileID: 11400000, guid: 869f7df674f35ec4ca5d4930ae503aef, type: 2}
@@ -432,6 +433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eac03c6ecaa49994baad88e62fc3b970, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectorPrefab: {fileID: 0}
   sizeX: 9
   sizeY: 9
   tileset: {fileID: 11400000, guid: 6a39bb34c6e227b4db5fe103c828cef7, type: 2}
@@ -481,6 +483,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eac03c6ecaa49994baad88e62fc3b970, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectorPrefab: {fileID: 0}
   sizeX: 10
   sizeY: 10
   tileset: {fileID: 11400000, guid: d748ce644a1cf0a448c6c85bc619be63, type: 2}
@@ -511,6 +514,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1844401793}
   - component: {fileID: 1844401792}
+  - component: {fileID: 1844401795}
+  - component: {fileID: 1844401794}
   m_Layer: 0
   m_Name: TestWFCGenerator (3)
   m_TagString: Untagged
@@ -530,6 +535,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eac03c6ecaa49994baad88e62fc3b970, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectorPrefab: {fileID: 5320526902307660913, guid: 3b8d82becf3ebb243b47785ff467dbd2, type: 3}
   sizeX: 11
   sizeY: 11
   tileset: {fileID: 11400000, guid: e89c3324984676245b74e77085943bf5, type: 2}
@@ -550,6 +556,41 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1844401794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844401791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15460831006e9764fad3c12b9c5a726f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  connectors: []
+  boxCollider: {fileID: 1844401795}
+--- !u!65 &1844401795
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844401791}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

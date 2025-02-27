@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TreeEditor;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -63,7 +64,7 @@ public class LevelGenerator : MonoBehaviour
 
     private SnappablePiece generateStartPoint()
     {
-        GameObject startPiece = Instantiate(getRandomPiece(settings.tileset.startPieces)).gameObject;
+        GameObject startPiece = Instantiate(getRandomPiece(settings.tileset.startPieces), transform).gameObject;
         float rotation = getRandomRotation();
         startPiece.transform.Rotate(new Vector3(0, rotation, 0));
         generatedObjects.Add(startPiece);
@@ -86,7 +87,7 @@ public class LevelGenerator : MonoBehaviour
             {
                 SnappablePiece pieceToGenerate = getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition));
                 int optimalConnector = pieceToGenerate.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1;
-                newPiece = Instantiate(pieceToGenerate);
+                newPiece = Instantiate(pieceToGenerate, transform);
                 List<Connector> newPieceConnectors = new(newPiece.getConnectors());
                 // THIS ALSO NEEDS FIXED AS IT WILL JUST NOT WORK AT THE MOMENT IF MORE THAN ONE AVAILABLE CONNECTOR
                 while (newPieceConnectors.Count > 0)

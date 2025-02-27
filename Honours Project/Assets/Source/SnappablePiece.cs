@@ -12,11 +12,15 @@ public class SnappablePiece : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (boxCollider == null)
+        {
+            boxCollider = GetComponent<BoxCollider>();
+        }
         populateConnectorList();
         boxCollider.isTrigger = true;
     }
 
-    private void populateConnectorList()
+    public void populateConnectorList()
     {
         Connector[] temp = GetComponentsInChildren<Connector>();
         connectors.Clear();
