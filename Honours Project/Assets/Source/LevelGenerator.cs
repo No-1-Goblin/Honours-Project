@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using TreeEditor;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -9,6 +10,7 @@ using UnityEngine;
 public class LevelGenerator : MonoBehaviour
 {
     [SerializeField] private GeneratorSettings settings;
+    [SerializeField] private WaveFunctionCollapse roomPrefab;
     private List<GameObject> generatedObjects = new();
     private List<SnappablePiece> populationQueue = new();
     public Vector3 targetPos = new(0, 0, 0);
@@ -36,6 +38,47 @@ public class LevelGenerator : MonoBehaviour
         int generatedPieces = 0;
         populationQueue.Add(startPiece);
         while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
+        {
+            populateConnections(populationQueue[0], targetPos);
+            populationQueue.RemoveAt(0);
+            generatedPieces++;
+        }
+        var connectors = populationQueue[0].getConnectors();
+        foreach (var connector in connectors)
+        {
+            if (connector.isConnected())
+                continue;
+            GameObject room = Instantiate(roomPrefab.gameObject, transform);
+            generatedObjects.Add(room);
+            room.GetComponent<WaveFunctionCollapse>().generateRoom();
+            SnappablePiece newPiece = room.GetComponent<SnappablePiece>();
+            var newPieceConnectors = newPiece.getConnectors();
+            while (newPieceConnectors.Count > 0)
+            {
+                Connector newConnector;
+                // Need to fix this bit here to work with more than one available connector
+                newConnector = newPiece.getConnectors()[0];
+                newPieceConnectors.Remove(newConnector);
+                // Figure out how to rotate piece to make connectors face each other
+                Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
+                if (rotateAmount.eulerAngles.x != 0)
+                {
+                    break;
+                }
+                newPiece.gameObject.transform.rotation *= rotateAmount;
+                // Find amount to move by to make connectors touch
+                Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
+                newPiece.gameObject.transform.position += moveAmount;
+                // This isn't actually doing what it should right now
+                newConnector.setConnected(true);
+                connector.setConnected(true);
+                break;
+            }
+            populationQueue.Clear();
+            populationQueue.Add(newPiece);
+        }
+        targetPos *= 2;
+        while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts * 2)
         {
             populateConnections(populationQueue[0], targetPos);
             populationQueue.RemoveAt(0);

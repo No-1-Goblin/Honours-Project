@@ -41,7 +41,9 @@ public class WaveFunctionCollapse : MonoBehaviour
         GameObject bottomConnector = Instantiate(connectorPrefab, transform);
         snappablePiece.populateConnectorList();
         topConnector.transform.position = new Vector3(edges.Item1.x * tileset.tileSize.x + tileset.tileSize.x * 0.5f, 0,  edges.Item1.y * tileset.tileSize.y + tileset.tileSize.y * 0.5f);
+        topConnector.transform.rotation = Quaternion.Euler(0, -90, 0);
         bottomConnector.transform.position = new Vector3(edges.Item2.x * tileset.tileSize.x + tileset.tileSize.x * 0.5f, 0, edges.Item2.y * tileset.tileSize.y);
+        bottomConnector.transform.rotation = Quaternion.Euler(0, 90, 0);
 
     }
 
