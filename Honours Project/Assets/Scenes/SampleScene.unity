@@ -153,7 +153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: d2529da90182b5149af5c3cda4e3d7c3, type: 2}
   roomPrefab: {fileID: 6544454211260223361, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
-  targetPos: {x: 100, y: 0, z: 100}
+  targetPos: {x: 1000, y: 0, z: 1000}
 --- !u!4 &507922999
 Transform:
   m_ObjectHideFlags: 0
@@ -556,6 +556,34 @@ PrefabInstance:
     - target: {fileID: 3140704261561075996, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
       propertyPath: m_Name
       value: TestWFCGenerator (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6544454211260223361, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
+      propertyPath: rejectFailedAttempts
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7394136418778904735, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
+      propertyPath: m_Size.x
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 7394136418778904735, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
+      propertyPath: m_Size.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7394136418778904735, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
+      propertyPath: m_Size.z
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 7394136418778904735, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
+      propertyPath: m_Center.x
+      value: 10.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7394136418778904735, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
+      propertyPath: m_Center.y
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7394136418778904735, guid: 8e8015628f1298b459a14a45707e421c, type: 3}
+      propertyPath: m_Center.z
+      value: 10.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -20,7 +20,7 @@ public class WaveFunctionCollapse : MonoBehaviour
     public void generateRoom()
     {
         generateWFCMatrix();
-        Tuple<Vector2Int, Vector2Int> edges = findEdges();
+        List<Vector2Int> edges = findEdges();
         if (edges == null)
         {
             Debug.Log("Failed to find edges");
@@ -40,14 +40,18 @@ public class WaveFunctionCollapse : MonoBehaviour
         GameObject topConnector = Instantiate(connectorPrefab, transform);
         GameObject bottomConnector = Instantiate(connectorPrefab, transform);
         snappablePiece.populateConnectorList();
-        topConnector.transform.position = new Vector3(edges.Item1.x * tileset.tileSize.x + tileset.tileSize.x * 0.5f, 0,  edges.Item1.y * tileset.tileSize.y + tileset.tileSize.y * 0.5f);
+        topConnector.transform.position = new Vector3(edges[0].x * tileset.tileSize.x + tileset.tileSize.x * 0.5f, 0,  edges[0].y * tileset.tileSize.y + tileset.tileSize.y * 0.5f);
         topConnector.transform.rotation = Quaternion.Euler(0, -90, 0);
-        bottomConnector.transform.position = new Vector3(edges.Item2.x * tileset.tileSize.x + tileset.tileSize.x * 0.5f, 0, edges.Item2.y * tileset.tileSize.y);
+        bottomConnector.transform.position = new Vector3(edges[1].x * tileset.tileSize.x + tileset.tileSize.x * 0.5f, 0, edges[1].y * tileset.tileSize.y);
         bottomConnector.transform.rotation = Quaternion.Euler(0, 90, 0);
-
+        float colliderSizeX = MathF.Abs(edges[3].x - edges[2].x) * tileset.tileSize.x + tileset.tileSize.x / 2f;
+        float colliderSizeY = 5;
+        float colliderSizeZ = MathF.Abs(edges[1].y - edges[0].y) * tileset.tileSize.y + tileset.tileSize.y / 2f;
+        snappablePiece.boxCollider.size = new Vector3(colliderSizeX, colliderSizeY, colliderSizeZ);
+        snappablePiece.boxCollider.center = new Vector3(edges[2].x * tileset.tileSize.x + colliderSizeX / 2f, colliderSizeY / 2f, edges[1].y * tileset.tileSize.y + colliderSizeZ / 2f);
     }
 
-    public Tuple<Vector2Int, Vector2Int> findEdges()
+    public List<Vector2Int> findEdges()
     {
         int edgeID;
         bool foundEdge;
@@ -110,7 +114,66 @@ public class WaveFunctionCollapse : MonoBehaviour
             return null;
         }
         Vector2Int bottomEdge = edges[UnityEngine.Random.Range(0, edges.Count)];
-        return new(topEdge, bottomEdge);
+
+        // Left edge
+        edges = new();
+        foundEdge = false;
+        edgeID = findIndexForTileOfType(typeof(LeftEdgeWFCTile));
+        if (edgeID == -1)
+        {
+            Debug.Log("Failed to find left edge in tileset");
+            return null;
+        }
+        for (int x = 0; x < sizeX; x++)
+        {
+            if (foundEdge)
+                break;
+            for (int y = 0; y < sizeY; y++)
+            {
+                if (intMatrix[x, y][0] == edgeID)
+                {
+                    foundEdge = true;
+                    edges.Add(new(x, y));
+                }
+            }
+        }
+        if (!foundEdge)
+        {
+            Debug.Log("Failed to find a left edge in the generated matrix");
+            return null;
+        }
+        Vector2Int leftEdge = edges[UnityEngine.Random.Range(0, edges.Count)];
+
+        // Left edge
+        edges = new();
+        foundEdge = false;
+        edgeID = findIndexForTileOfType(typeof(RightEdgeWFCTile));
+        if (edgeID == -1)
+        {
+            Debug.Log("Failed to find right edge in tileset");
+            return null;
+        }
+        for (int x = sizeX - 1; x >= 0; x--)
+        {
+            if (foundEdge)
+                break;
+            for (int y = 0; y < sizeY; y++)
+            {
+                if (intMatrix[x, y][0] == edgeID)
+                {
+                    foundEdge = true;
+                    edges.Add(new(x, y));
+                }
+            }
+        }
+        if (!foundEdge)
+        {
+            Debug.Log("Failed to find a right edge in the generated matrix");
+            return null;
+        }
+        Vector2Int rightEdge = edges[UnityEngine.Random.Range(0, edges.Count)];
+
+        return new() { topEdge, bottomEdge, leftEdge, rightEdge };
     }
     public void deleteSpawnedObjects()
     {

@@ -36,12 +36,17 @@ public class LevelGenerator : MonoBehaviour
         }
         SnappablePiece startPiece = generateStartPoint();
         int generatedPieces = 0;
+        populationQueue = new();
         populationQueue.Add(startPiece);
         while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
         {
             populateConnections(populationQueue[0], targetPos);
             populationQueue.RemoveAt(0);
             generatedPieces++;
+            if (populationQueue.Count == 0)
+            {
+                populationQueue.Add(generatedObjects[generatedObjects.Count - 1].GetComponent<SnappablePiece>());
+            }
         }
         var connectors = populationQueue[0].getConnectors();
         foreach (var connector in connectors)
@@ -61,9 +66,11 @@ public class LevelGenerator : MonoBehaviour
                 newPieceConnectors.Remove(newConnector);
                 // Figure out how to rotate piece to make connectors face each other
                 Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
-                if (rotateAmount.eulerAngles.x != 0)
+                if (rotateAmount.x != 0)
                 {
-                    break;
+                    Quaternion xFlipper = Quaternion.Euler(new(180, 180, 0));
+                    rotateAmount *= xFlipper;
+
                 }
                 newPiece.gameObject.transform.rotation *= rotateAmount;
                 // Find amount to move by to make connectors touch
@@ -77,7 +84,6 @@ public class LevelGenerator : MonoBehaviour
             populationQueue.Clear();
             populationQueue.Add(newPiece);
         }
-        targetPos *= 2;
         while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts * 2)
         {
             populateConnections(populationQueue[0], targetPos);
@@ -125,10 +131,12 @@ public class LevelGenerator : MonoBehaviour
             bool success = false;
             SnappablePiece newPiece;
             int loops = 0;
+            var pieceList = new List<SnappablePiece>(settings.tileset.standardPieces);
             // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
             do
             {
-                SnappablePiece pieceToGenerate = getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(settings.tileset.standardPieces, connector, targetPosition));
+                SnappablePiece pieceToGenerate = getRandomPieceWithLinearWeighting(getPieceListSortedByDistance(pieceList, connector, targetPosition));
+                pieceList.Remove(pieceToGenerate);
                 int optimalConnector = pieceToGenerate.getOptimalConnectorLayoutForDistance(connector, targetPosition).Item1;
                 newPiece = Instantiate(pieceToGenerate, transform);
                 List<Connector> newPieceConnectors = new(newPiece.getConnectors());
@@ -141,12 +149,28 @@ public class LevelGenerator : MonoBehaviour
                     newPieceConnectors.Remove(newConnector);
                     // Figure out how to rotate piece to make connectors face each other
                     Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
+                    if (rotateAmount.x != 0)
+                    {
+                        Quaternion xFlipper = Quaternion.Euler(new(180, 180, 0));
+                        rotateAmount *= xFlipper;
+
+                    }
+                    if (rotateAmount.z != 0)
+                    {
+                        rotateAmount.z = 0;
+                    }
                     newPiece.gameObject.transform.rotation *= rotateAmount;
                     // Find amount to move by to make connectors touch
                     Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
                     newPiece.gameObject.transform.position += moveAmount;
                     // This isn't actually doing what it should right now
-                    success = true;
+                    bool collision = checkCollisionAgainstPreviousPieces(newPiece);
+                    success = !collision;
+                    if (collision)
+                    {
+                        Debug.Log("Collision");
+                        break;
+                    }
                     newConnector.setConnected(true);
                     connector.setConnected(true);
                     generatedObjects.Add(newPiece.gameObject);
@@ -155,8 +179,8 @@ public class LevelGenerator : MonoBehaviour
                 // Need to add actual error handling here
                 if (!success)
                 {
-                    DestroyImmediate(newPiece);
-                    break;
+                    DestroyImmediate(newPiece.gameObject);
+                    newPiece = null;
                 }
                 loops++;
                 // REALLY NEED TO IMPLEMENT SOMETHING FOR IF NO SUCCESS
@@ -165,7 +189,7 @@ public class LevelGenerator : MonoBehaviour
                 {
                     break;
                 }
-            } while (!success);
+            } while (!success && pieceList.Count > 0);
             if (newPiece)
             {
                 float prevDistance = (targetPosition - startPiece.transform.position).sqrMagnitude;
@@ -173,6 +197,35 @@ public class LevelGenerator : MonoBehaviour
                 if (newDistance < prevDistance)
                     gotCloser = true;
                 populationQueue.Add(newPiece);
+            } else
+            {
+                newPiece = Instantiate<SnappablePiece>(settings.tileset.standardPieces[2], transform);
+                var newPieceConnectors = newPiece.getConnectors();
+                while (newPieceConnectors.Count > 0)
+                {
+                    Connector newConnector;
+                    // Need to fix this bit here to work with more than one available connector
+                    newConnector = newPiece.getConnectors()[0];
+                    newPieceConnectors.Remove(newConnector);
+                    // Figure out how to rotate piece to make connectors face each other
+                    Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
+                    if (rotateAmount.x != 0)
+                    {
+                        Quaternion xFlipper = Quaternion.Euler(new(180, 180, 0));
+                        rotateAmount *= xFlipper;
+
+                    }
+                    newPiece.gameObject.transform.rotation *= rotateAmount;
+                    // Find amount to move by to make connectors touch
+                    Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
+                    newPiece.gameObject.transform.position += moveAmount;
+                    // This isn't actually doing what it should right now
+                    newConnector.setConnected(true);
+                    connector.setConnected(true);
+                    break;
+                }
+                populationQueue.Add(newPiece);
+                generatedObjects.Add(newPiece.gameObject);
             }
         }
         return gotCloser;
@@ -182,6 +235,21 @@ public class LevelGenerator : MonoBehaviour
     {
         Quaternion rotationAmount = Quaternion.FromToRotation(secondConnectorNormal, -firstConnectorNormal);
         return rotationAmount;
+    }
+
+    private bool checkCollisionAgainstPreviousPieces(SnappablePiece newPiece)
+    {
+        bool collision = false;
+        for (int i = 0; i < generatedObjects.Count - 1; i++)
+        {
+            if (intersects(newPiece.GetComponent<BoxCollider>().center + newPiece.transform.position, newPiece.GetComponent<BoxCollider>().size * 0.98f, generatedObjects[i].GetComponent<BoxCollider>().center + generatedObjects[i].transform.position, generatedObjects[i].GetComponent<BoxCollider>().size * 0.98f))
+            {
+                collision = true;
+                break;
+            }
+        }
+
+        return collision;
     }
 
     // Unity's default intersection code considers two boxes that hug edges to be colliding, I don't want that
