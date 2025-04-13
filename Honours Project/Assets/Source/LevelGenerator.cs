@@ -38,57 +38,24 @@ public class LevelGenerator : MonoBehaviour
         int generatedPieces = 0;
         populationQueue = new();
         populationQueue.Add(startPiece);
-        while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
+        for (int i = 0; i < 10; i++)
         {
-            populateConnections(populationQueue[0], targetPos);
-            populationQueue.RemoveAt(0);
-            generatedPieces++;
-            if (populationQueue.Count == 0)
+            generatedPieces = 0;
+            while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
             {
-                populationQueue.Add(generatedObjects[generatedObjects.Count - 1].GetComponent<SnappablePiece>());
-            }
-        }
-        var connectors = populationQueue[0].getConnectors();
-        foreach (var connector in connectors)
-        {
-            if (connector.isConnected())
-                continue;
-            GameObject room = Instantiate(roomPrefab.gameObject, transform);
-            generatedObjects.Add(room);
-            room.GetComponent<WaveFunctionCollapse>().generateRoom();
-            SnappablePiece newPiece = room.GetComponent<SnappablePiece>();
-            var newPieceConnectors = newPiece.getConnectors();
-            while (newPieceConnectors.Count > 0)
-            {
-                Connector newConnector;
-                // Need to fix this bit here to work with more than one available connector
-                newConnector = newPiece.getConnectors()[0];
-                newPieceConnectors.Remove(newConnector);
-                // Figure out how to rotate piece to make connectors face each other
-                Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
-                if (rotateAmount.x != 0)
+                if (!populateConnections(populationQueue[0], targetPos))
                 {
-                    Quaternion xFlipper = Quaternion.Euler(new(180, 180, 0));
-                    rotateAmount *= xFlipper;
-
+                    generateLevel();
+                    return;
                 }
-                newPiece.gameObject.transform.rotation *= rotateAmount;
-                // Find amount to move by to make connectors touch
-                Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
-                newPiece.gameObject.transform.position += moveAmount;
-                // This isn't actually doing what it should right now
-                newConnector.setConnected(true);
-                connector.setConnected(true);
-                break;
+                populationQueue.RemoveAt(0);
+                generatedPieces++;
+                if (populationQueue.Count == 0)
+                {
+                    populationQueue.Add(generatedObjects[generatedObjects.Count - 1].GetComponent<SnappablePiece>());
+                }
             }
-            populationQueue.Clear();
-            populationQueue.Add(newPiece);
-        }
-        while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts * 2)
-        {
-            populateConnections(populationQueue[0], targetPos);
-            populationQueue.RemoveAt(0);
-            generatedPieces++;
+            generateRoom();
         }
     }
 
@@ -122,7 +89,7 @@ public class LevelGenerator : MonoBehaviour
 
     private bool populateConnections(SnappablePiece startPiece, Vector3 targetPosition)
     {
-        bool gotCloser = false;
+        bool successfulPlacement = true;
         List<Connector> connectors = startPiece.getConnectors();
         foreach (Connector connector in connectors)
         {
@@ -130,7 +97,6 @@ public class LevelGenerator : MonoBehaviour
                 continue;
             bool success = false;
             SnappablePiece newPiece;
-            int loops = 0;
             var pieceList = new List<SnappablePiece>(settings.tileset.standardPieces);
             // THIS NEEDS REPLACED AS IT CAN CAUSE INFINITE LOOPS BTW SUPER REMEMBER TO FIX THIS PLEASE
             do
@@ -168,7 +134,7 @@ public class LevelGenerator : MonoBehaviour
                     success = !collision;
                     if (collision)
                     {
-                        Debug.Log("Collision");
+                        //Debug.Log("Collision");
                         break;
                     }
                     newConnector.setConnected(true);
@@ -176,59 +142,54 @@ public class LevelGenerator : MonoBehaviour
                     generatedObjects.Add(newPiece.gameObject);
                     break;
                 }
-                // Need to add actual error handling here
                 if (!success)
                 {
                     DestroyImmediate(newPiece.gameObject);
                     newPiece = null;
-                }
-                loops++;
-                // REALLY NEED TO IMPLEMENT SOMETHING FOR IF NO SUCCESS
-                // JUST LIKE ONE MORE COMMENT TO EXPRESS HOW IMPORTANT THIS IS
-                if (loops > 10)
-                {
-                    break;
                 }
             } while (!success && pieceList.Count > 0);
             if (newPiece)
             {
                 float prevDistance = (targetPosition - startPiece.transform.position).sqrMagnitude;
                 float newDistance = (targetPosition - newPiece.transform.position).sqrMagnitude;
-                if (newDistance < prevDistance)
-                    gotCloser = true;
+                successfulPlacement = true;
                 populationQueue.Add(newPiece);
+                break;
             } else
             {
-                newPiece = Instantiate<SnappablePiece>(settings.tileset.standardPieces[2], transform);
-                var newPieceConnectors = newPiece.getConnectors();
-                while (newPieceConnectors.Count > 0)
-                {
-                    Connector newConnector;
-                    // Need to fix this bit here to work with more than one available connector
-                    newConnector = newPiece.getConnectors()[0];
-                    newPieceConnectors.Remove(newConnector);
-                    // Figure out how to rotate piece to make connectors face each other
-                    Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
-                    if (rotateAmount.x != 0)
-                    {
-                        Quaternion xFlipper = Quaternion.Euler(new(180, 180, 0));
-                        rotateAmount *= xFlipper;
+                Debug.Log("Fatal collision");
+                successfulPlacement = false;
+                break;
+                //newPiece = Instantiate<SnappablePiece>(settings.tileset.standardPieces[2], transform);
+                //var newPieceConnectors = newPiece.getConnectors();
+                //while (newPieceConnectors.Count > 0)
+                //{
+                //    Connector newConnector;
+                //    // Need to fix this bit here to work with more than one available connector
+                //    newConnector = newPiece.getConnectors()[0];
+                //    newPieceConnectors.Remove(newConnector);
+                //    // Figure out how to rotate piece to make connectors face each other
+                //    Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
+                //    if (rotateAmount.x != 0)
+                //    {
+                //        Quaternion xFlipper = Quaternion.Euler(new(180, 180, 0));
+                //        rotateAmount *= xFlipper;
 
-                    }
-                    newPiece.gameObject.transform.rotation *= rotateAmount;
-                    // Find amount to move by to make connectors touch
-                    Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
-                    newPiece.gameObject.transform.position += moveAmount;
-                    // This isn't actually doing what it should right now
-                    newConnector.setConnected(true);
-                    connector.setConnected(true);
-                    break;
-                }
-                populationQueue.Add(newPiece);
-                generatedObjects.Add(newPiece.gameObject);
+                //    }
+                //    newPiece.gameObject.transform.rotation *= rotateAmount;
+                //    // Find amount to move by to make connectors touch
+                //    Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
+                //    newPiece.gameObject.transform.position += moveAmount;
+                //    // This isn't actually doing what it should right now
+                //    newConnector.setConnected(true);
+                //    connector.setConnected(true);
+                //    break;
+                //}
+                //populationQueue.Add(newPiece);
+                //generatedObjects.Add(newPiece.gameObject);
             }
         }
-        return gotCloser;
+        return successfulPlacement;
     }
 
     private Quaternion getAmountToRotate(Vector3 firstConnectorNormal, Vector3 secondConnectorNormal)
@@ -240,10 +201,32 @@ public class LevelGenerator : MonoBehaviour
     private bool checkCollisionAgainstPreviousPieces(SnappablePiece newPiece)
     {
         bool collision = false;
+        Vector3 newPieceCentre = newPiece.transform.rotation * newPiece.GetComponent<BoxCollider>().center + newPiece.transform.position;
+        Vector3 newPieceBoxSize = newPiece.GetComponent<BoxCollider>().size;
+        newPieceBoxSize = rotateCollisionBox(newPieceCentre, newPieceBoxSize, newPiece.transform.rotation.eulerAngles);
+        //string text = "Old Centre: x = " + newPieceCentre.x + ", y = " + newPieceCentre.y + ", z = " + newPieceCentre.z;
+        //Debug.Log(text);
+        //text = "Old Size: x = " + newPieceBoxSize.x + ", y = " + newPieceBoxSize.y + ", z = " + newPieceBoxSize.z;
+        //Debug.Log(text);
+        //text = "Rotating around: x = " + newPiece.transform.rotation.eulerAngles.x + ", y = " + newPiece.transform.rotation.eulerAngles.y + ", z = " + newPiece.transform.rotation.eulerAngles.z;
+        //Debug.Log(text);
+        //var temp = rotateCollisionBox(newPieceCentre, newPieceBoxSize, newPiece.transform.rotation.eulerAngles);
+        //text = "New Centre: x = " + temp.Item1.x + ", y = " + temp.Item1.y + ", z = " + temp.Item1.z;
+        //Debug.Log(text);
+        //text = "New Size: x = " + temp.Item2.x + ", y = " + temp.Item2.y + ", z = " + temp.Item2.z;
+        //Debug.Log(text);
         for (int i = 0; i < generatedObjects.Count - 1; i++)
         {
-            if (intersects(newPiece.GetComponent<BoxCollider>().center + newPiece.transform.position, newPiece.GetComponent<BoxCollider>().size * 0.98f, generatedObjects[i].GetComponent<BoxCollider>().center + generatedObjects[i].transform.position, generatedObjects[i].GetComponent<BoxCollider>().size * 0.98f))
+            Vector3 oldPieceCentre = generatedObjects[i].transform.rotation * generatedObjects[i].GetComponent<BoxCollider>().center + generatedObjects[i].transform.position;
+            Vector3 oldPieceSize = generatedObjects[i].GetComponent<BoxCollider>().size;
+            oldPieceSize = rotateCollisionBox(oldPieceCentre, oldPieceSize, generatedObjects[i].transform.rotation.eulerAngles);
+            if (intersects(newPieceCentre, newPieceBoxSize * 0.5f, oldPieceCentre, oldPieceSize * 0.5f))
             {
+                Debug.Log("New piece centre: " + newPieceCentre.x + ", " + newPieceCentre.y + ", " + newPieceCentre.z);
+                Debug.Log("New piece size: " + newPieceBoxSize.x + ", " + newPieceBoxSize.y + ", " + newPieceBoxSize.z);
+                Debug.Log("Old piece centre: " + oldPieceCentre.x + ", " + oldPieceCentre.y + ", " + oldPieceCentre.z);
+                Debug.Log("Old piece size: " + oldPieceSize.x + ", " + oldPieceSize.y + ", " + oldPieceSize.z);
+                Debug.Log("Collision between " + newPiece.name + " and " + generatedObjects[i].name);
                 collision = true;
                 break;
             }
@@ -252,9 +235,60 @@ public class LevelGenerator : MonoBehaviour
         return collision;
     }
 
-    // Unity's default intersection code considers two boxes that hug edges to be colliding, I don't want that
-    // This collision check is somewhat bugged however, as it does not account for rotation. I need to speak to Gaz about how to fix this
-    // Also because I'm feeding in 98% size box, y gets a lil messed up as well, need to fix that
+    // Creates a new AABB by rotating an existing one. Doesn't technically rotate the old box as much as rotates the old one then builds a new box around it that is axis aligned
+    private Vector3 rotateCollisionBox(Vector3 centre, Vector3 size, Vector3 rotation)
+    {
+        // Calculate corners of bounding box
+        List<Vector3> corners = new List<Vector3>();
+        for (int xMult = -1; xMult <= 1; xMult += 2)
+        {
+            for (int yMult = -1; yMult <= 1; yMult += 2)
+            {
+                for (int zMult = -1; zMult <= 1; zMult += 2)
+                {
+                    corners.Add(centre + new Vector3(size.x * xMult, size.y * yMult, size.z * zMult) * 0.5f);
+                }
+            }
+        }
+        // Rotate the corners of the box
+        Quaternion rotator = Quaternion.Euler(rotation);
+        List<Vector3> rotatedCorners = new List<Vector3>();
+        foreach (Vector3 corner in corners)
+        {
+            // Get direction from centre to the corner
+            Vector3 direction = corner - centre;
+            // Rotate direction
+            direction = rotator * direction;
+            // Add it back to the centre
+            rotatedCorners.Add(direction + centre);
+        }
+        // Find new min and max for each coord
+        float xMin, xMax, yMin, yMax, zMin, zMax;
+        xMin = rotatedCorners[0].x;
+        xMax = rotatedCorners[0].x;
+        yMin = rotatedCorners[0].y;
+        yMax = rotatedCorners[0].y;
+        zMin = rotatedCorners[0].z;
+        zMax = rotatedCorners[0].z;
+        for (int i = 1; i < rotatedCorners.Count; i++)
+        {
+            if (rotatedCorners[i].x < xMin)
+                xMin = rotatedCorners[i].x;
+            else if (rotatedCorners[i].x > xMax)
+                xMax = rotatedCorners[i].x;
+            if (rotatedCorners[i].y < yMin)
+                yMin = rotatedCorners[i].y;
+            else if (rotatedCorners[i].y > yMax)
+                yMax = rotatedCorners[i].y;
+            if (rotatedCorners[i].z < zMin)
+                zMin = rotatedCorners[i].z;
+            else if (rotatedCorners[i].z > zMax)
+                zMax = rotatedCorners[i].z;
+        }
+        return new Vector3(xMax - xMin, yMax - yMin, zMax - zMin);
+    }
+
+    // Unity's default intersection code requires a physics update for transforms to apply
     private bool intersects(Vector3 pos1, Vector3 extents1, Vector3 pos2, Vector3 extents2)
     {
         Vector3 min1 = pos1 - extents1;
@@ -359,6 +393,46 @@ public class LevelGenerator : MonoBehaviour
             pieceOnlyList.Add(item.Item1);
         }
         return pieceOnlyList;
+    }
+
+    private void generateRoom()
+    {
+        var connectors = populationQueue[0].getConnectors();
+        foreach (var connector in connectors)
+        {
+            if (connector.isConnected())
+                continue;
+            GameObject room = Instantiate(roomPrefab.gameObject, transform);
+            generatedObjects.Add(room);
+            room.GetComponent<WaveFunctionCollapse>().generateRoom();
+            SnappablePiece newPiece = room.GetComponent<SnappablePiece>();
+            var newPieceConnectors = newPiece.getConnectors();
+            while (newPieceConnectors.Count > 0)
+            {
+                Connector newConnector;
+                // Need to fix this bit here to work with more than one available connector
+                newConnector = newPiece.getConnectors()[0];
+                newPieceConnectors.Remove(newConnector);
+                // Figure out how to rotate piece to make connectors face each other
+                Quaternion rotateAmount = getAmountToRotate(connector.getConnectorNormal(), newConnector.getConnectorNormal());
+                if (rotateAmount.x != 0)
+                {
+                    Quaternion xFlipper = Quaternion.Euler(new(180, 180, 0));
+                    rotateAmount *= xFlipper;
+
+                }
+                newPiece.gameObject.transform.rotation *= rotateAmount;
+                // Find amount to move by to make connectors touch
+                Vector3 moveAmount = connector.transform.position - newConnector.transform.position;
+                newPiece.gameObject.transform.position += moveAmount;
+                // This isn't actually doing what it should right now
+                newConnector.setConnected(true);
+                connector.setConnected(true);
+                break;
+            }
+            populationQueue.Clear();
+            populationQueue.Add(newPiece);
+        }
     }
 
     public void deleteLevel()
