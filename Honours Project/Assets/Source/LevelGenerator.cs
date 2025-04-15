@@ -14,6 +14,7 @@ public class LevelGenerator : MonoBehaviour
     private List<GameObject> generatedObjects = new();
     private List<SnappablePiece> populationQueue = new();
     public Vector3 targetPos = new(0, 0, 0);
+    private List<Vector3> roomPositions = new();
 
     public GeneratorSettings getSettings()
     {
@@ -34,13 +35,15 @@ public class LevelGenerator : MonoBehaviour
             Debug.Log("Invalid Generator Settings");
             return;
         }
+        generateRoomPositions();
         SnappablePiece startPiece = generateStartPoint();
         int generatedPieces = 0;
         populationQueue = new();
         populationQueue.Add(startPiece);
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < settings.roomCount; i++)
         {
             generatedPieces = 0;
+            targetPos = roomPositions[i];
             while (populationQueue.Count != 0 && generatedPieces <= settings.maxParts)
             {
                 if (!populateConnections(populationQueue[0], targetPos))
@@ -50,10 +53,6 @@ public class LevelGenerator : MonoBehaviour
                 }
                 populationQueue.RemoveAt(0);
                 generatedPieces++;
-                if (populationQueue.Count == 0)
-                {
-                    populationQueue.Add(generatedObjects[generatedObjects.Count - 1].GetComponent<SnappablePiece>());
-                }
             }
             generateRoom();
         }
@@ -454,6 +453,19 @@ public class LevelGenerator : MonoBehaviour
                 DestroyImmediate(populationQueue[0]);
             }
             populationQueue.RemoveAt(0);
+        }
+        roomPositions = new();
+    }
+
+    private void generateRoomPositions()
+    {
+        Vector3 position = new(0, 0, 0);
+        for (int i = 0; i < settings.roomCount; i++)
+        {
+            position.x += UnityEngine.Random.Range(settings.minRoomDistanceX, settings.maxRoomDistanceX);
+            position.y += UnityEngine.Random.Range(settings.minRoomDistanceY, settings.maxRoomDistanceY);
+            position.z += UnityEngine.Random.Range(settings.minRoomDistanceZ, settings.maxRoomDistanceZ);
+            roomPositions.Add(new Vector3(position.x, position.y, position.z));
         }
     }
 }
