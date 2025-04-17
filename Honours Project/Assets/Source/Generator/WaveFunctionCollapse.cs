@@ -14,6 +14,7 @@ public class WaveFunctionCollapse : MonoBehaviour
     public bool rejectFailedAttempts = true;
     public bool logDebugStatements = false;
     private List<int>[,] intMatrix;
+    private int[,] floorMatrix;
     private List<GameObject> spawnedObjects;
     private SnappablePiece snappablePiece;
 
@@ -205,6 +206,7 @@ public class WaveFunctionCollapse : MonoBehaviour
         }
         // Create matrix
         intMatrix = new List<int>[sizeX, sizeY];
+        floorMatrix = new int[sizeX, sizeY];
     }
 
     public void generateWFCMatrix()
@@ -285,12 +287,19 @@ public class WaveFunctionCollapse : MonoBehaviour
             }
             Debug.Log(output);
         }
+
+        populateFloorTiles();
+
+        // Generate Level Pieces To Follow The Matrix
         for (int y = sizeY - 1; y >= 0; y--)
         {
             for (int x = 0; x < sizeX; x++)
             {
                 if (intMatrix[x, y].Count > 0)
-                spawnedObjects.Add(Instantiate(tileset.tiles[intMatrix[x, y][0]], new Vector3(x * tileset.tileSize.x, 0, y * tileset.tileSize.y), Quaternion.identity, gameObject.transform).gameObject);
+                    if (tileset.tiles[intMatrix[x, y][0]].GetType() != typeof(FloorWFCTile))
+                        spawnedObjects.Add(Instantiate(tileset.tiles[intMatrix[x, y][0]], new Vector3(x * tileset.tileSize.x, 0, y * tileset.tileSize.y), Quaternion.identity, gameObject.transform).gameObject);
+                    else
+                        spawnedObjects.Add(Instantiate(getFloorTile(x, y), new Vector3(x * tileset.tileSize.x, 0, y * tileset.tileSize.y), Quaternion.identity, gameObject.transform).gameObject);
             }
         }
     }
@@ -401,6 +410,58 @@ public class WaveFunctionCollapse : MonoBehaviour
             }
         }
         return index;
+    }
+
+    void populateFloorTiles()
+    {
+        Vector2 checkpointPosition = Vector2.zero;
+        int searchRadius = 0;
+        bool checkpointPlaced = false;
+        while (!checkpointPlaced)
+        {
+            for (int y = sizeY / 2 - searchRadius; y < sizeY / 2 + searchRadius; y++)
+            {
+                for (int x = sizeX / 2 - searchRadius; x < sizeX / 2 + searchRadius; x++)
+                {
+                    if (tileset.tiles[intMatrix[x, y][0]].GetType() == typeof(FloorWFCTile))
+                    {
+                        checkpointPlaced = true;
+                        checkpointPosition = new Vector2(x, y);
+                    }
+                }
+            }
+            searchRadius++;
+        }
+        for (int y = sizeY - 1; y >= 0; y--)
+        {
+            for (int x = 0; x < sizeX; x++)
+            {
+                if (intMatrix[x, y].Count > 0)
+                    if (tileset.tiles[intMatrix[x, y][0]].GetType() == typeof(FloorWFCTile))
+                    {
+                        if (x == checkpointPosition.x && y == checkpointPosition.y)
+                            floorMatrix[x, y] = -2;
+                        else
+                            floorMatrix[x, y] = 0;
+                    }
+                    else
+                        floorMatrix[x, y] = -1;
+            }
+        }
+    }
+
+    WFCTile getFloorTile(int x, int y)
+    {
+        WFCTile floorTile;
+        if (floorMatrix[x, y] == -2)
+        {
+            floorTile = tileset.checkpointTile;
+        } else
+        {
+            floorTile = tileset.floorTiles[floorMatrix[x, y]];
+        }
+
+        return floorTile;
     }
 }
 

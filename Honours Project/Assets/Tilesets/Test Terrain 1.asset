@@ -27,4 +27,7 @@ MonoBehaviour:
   - {fileID: -8109455619116225267, guid: e878cd1e57c8d9240aefec1f5744b172, type: 3}
   - {fileID: -8485277120325100389, guid: 5712221584f65dd4c9faf18c1c91a3f4, type: 3}
   - {fileID: 412954102045854273, guid: 9233306b2f3130441bee026da85bcb94, type: 3}
+  floorTiles:
+  - {fileID: 4939774877754019901, guid: 1b4205f6f2bad7948b506042d452fd9b, type: 3}
   tileSize: {x: 2, y: 2}
+  checkpointTile: {fileID: 4939774877754019901, guid: ddcc014007418604e9ec46844fad4dbb, type: 3}

@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 5bb8fc4346764184f8347c3e46b6ff3b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - boxCollider: {instanceID: 0}
+  - persistentVariables: {fileID: 11400000, guid: 1a452d829b6308b459156a5ff1c740f6, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
