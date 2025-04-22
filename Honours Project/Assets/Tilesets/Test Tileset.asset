@@ -15,10 +15,12 @@ MonoBehaviour:
   startPieces:
   - {fileID: 5748930966876094117, guid: 73ddbd40e26aa1e4e92eb6687c4e0a91, type: 3}
   endPieces:
-  - {fileID: 5748930966876094117, guid: 73ddbd40e26aa1e4e92eb6687c4e0a91, type: 3}
+  - {fileID: 5748930966876094117, guid: 3f6abe621fe81bd4da5655f468d32e82, type: 3}
   standardPieces:
   - {fileID: 5997292806178487266, guid: 9f00f74001b4b354998b491612ca0485, type: 3}
-  - {fileID: 7276431228720619505, guid: 0f3ff68de60c6904d85add9e36fa70de, type: 3}
+  - {fileID: 473966256340898114, guid: d03335ffdf9900044a7f688fe2501a26, type: 3}
   - {fileID: 6326929189358355832, guid: c6940c4a82d2fc340bd33e5b8b154610, type: 3}
   - {fileID: 3182507672849192352, guid: 679e639ab34ae854ca4438f6c5b8e414, type: 3}
   - {fileID: 5997292806178487266, guid: 0879e61850e8ec542b0aec8cb3e469df, type: 3}
+  - {fileID: 473966256340898114, guid: de00021e82847fe4ca3659e21c670311, type: 3}
+  - {fileID: 6326929189358355832, guid: 1cf01e31b3c5c9d41a425f6706515d13, type: 3}

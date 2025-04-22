@@ -7,6 +7,7 @@ public class FloorWFCTile : WFCTile
 {
     public override bool checkTileRule(List<int>[,] matrix, int sizeX, int sizeY, WFCTileset tileset, Tuple<int, int> position)
     {
+        // Check for invalid edges or adjacent empty tiles
         var adjacents = getAdjacents(matrix, sizeX, sizeY, tileset, position);
         if (isDeterminedAsType(adjacents[WFCDirections.up], typeof(RightEdgeWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(LeftEdgeWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(TLOuterCornerWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(TROuterCornerWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(BLOuterCornerWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(BROuterCornerWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(BottomEdgeWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(BLInnerCornerWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(BRInnerCornerWFCTile)) || isDeterminedAsType(adjacents[WFCDirections.up], typeof(EmptyWFCTile)))
             return false;

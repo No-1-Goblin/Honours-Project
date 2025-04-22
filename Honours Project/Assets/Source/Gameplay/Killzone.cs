@@ -6,11 +6,11 @@ using UnityEngine;
 public class Killzone : MonoBehaviour
 {
     public ExampleCharacterController player;
-    public int deaths = 0;
     public PersistentVariables persistentVariables;
     void Start()
     {
-        deaths = 0;
+        persistentVariables.playerRespawn.AddListener(killPlayer);
+        player = GameObject.FindWithTag("Player").GetComponent<ExampleCharacterController>();
     }
 
     // Update is called once per frame
@@ -18,9 +18,13 @@ public class Killzone : MonoBehaviour
     {
         if (player.transform.position.y < -100)
         {
-            deaths++;
-            player.Motor.SetPositionAndRotation(persistentVariables.respawnPosition, persistentVariables.respawnRotation);
-            player.Motor.BaseVelocity = Vector3.zero;
+            persistentVariables.playerRespawn.Invoke();
         }
+    }
+
+    void killPlayer()
+    {
+        player.Motor.SetPositionAndRotation(persistentVariables.respawnPosition, persistentVariables.respawnRotation);
+        player.Motor.BaseVelocity = Vector3.zero;
     }
 }

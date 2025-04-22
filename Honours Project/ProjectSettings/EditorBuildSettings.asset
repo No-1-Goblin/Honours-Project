@@ -4,5 +4,32 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/Initial Scene.unity
+    guid: 1dc4ff687aef4234d9149df98eb3d383
+  - enabled: 0
+    path: Assets/Scenes/BetweenLevels.unity
+    guid: 38a4cc4502ff7d24884f314446cf4bc1
+  - enabled: 0
+    path: Assets/Scenes/Generated Level 1.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 0
+    path: Assets/Scenes/Generated Level 2.unity
+    guid: f4ea4ad567713274d968cb6a7e757eaf
+  - enabled: 0
+    path: Assets/Scenes/Crafted Level 1.unity
+    guid: 84cc7daf1008b0244bd28b18ef93d26a
+  - enabled: 0
+    path: Assets/Scenes/Crafted Level 2.unity
+    guid: 76d4ea92ba0a8d348b93e203a16ef8ec
+  - enabled: 1
+    path: Assets/Scenes/Edit Generator Settings.unity
+    guid: c0a9fc6f440b5e34bada03e9bb4b3878
+  - enabled: 1
+    path: Assets/Scenes/Generate Level On Load.unity
+    guid: 88ded932ba990f148a04d37725a73e87
+  - enabled: 1
+    path: Assets/Scenes/Generating Level.unity
+    guid: 662dec34e67dd774d8457e7cbc84b723
   m_configObjects: {}

@@ -13,3 +13,15 @@ MonoBehaviour:
   m_Name: Persistent Variables
   m_EditorClassIdentifier: 
   respawnPosition: {x: 0, y: 0, z: 0}
+  respawnRotation: {x: 0, y: 0, z: 0, w: 1}
+  coins: 0
+  deaths: 0
+  playerRespawn:
+    m_PersistentCalls:
+      m_Calls: []
+  currentLevel: 0
+  levels:
+  - Generated Level 1
+  - Crafted Level 1
+  - Generated Level 2
+  - Crafted Level 2

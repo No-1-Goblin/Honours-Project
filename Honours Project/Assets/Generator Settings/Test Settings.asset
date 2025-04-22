@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileset: {fileID: 11400000, guid: 0c222be70b2cb914d8de8e2b6f1e4942, type: 2}
   minParts: 1
-  maxParts: 10
-  roomCount: 10
-  minRoomDistanceX: 100
-  maxRoomDistanceX: 200
-  minRoomDistanceY: -50
-  maxRoomDistanceY: 50
-  minRoomDistanceZ: -100
-  maxRoomDistanceZ: 100
+  maxParts: 5
+  roomCount: 3
+  minRoomDistanceX: 40
+  maxRoomDistanceX: 70
+  minRoomDistanceY: -20
+  maxRoomDistanceY: 20
+  minRoomDistanceZ: -50
+  maxRoomDistanceZ: 50
+  roomDistanceTolerance: 20
